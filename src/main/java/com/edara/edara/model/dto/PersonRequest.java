@@ -1,10 +1,10 @@
 package com.edara.edara.model.dto;
 
 import com.edara.edara.model.enums.Gender;
-import com.edara.edara.model.enums.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,8 +37,8 @@ public class PersonRequest {
     @JsonProperty("account")
     //@Size(min = 5 ,message = "User name must be more than 5 letters")
     //@Size(max = 20 ,message = "Last name must be less than 20 letters")
-    @NotNull(message = "User-name Must Not Be Null")
-    @NotEmpty(message = "User-name Must Not Be Empty")
+    @NotNull(message = "Account Must Not Be Null")
+    @NotEmpty(message = "Account Must Not Be Empty")
     private String account ;
 
     @JsonProperty("password")
@@ -74,7 +74,5 @@ public class PersonRequest {
     @JsonProperty("city")
     private String city;
 
-
-    private final Role role = Role.USER;
 
 }

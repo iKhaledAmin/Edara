@@ -1,20 +1,19 @@
 package com.edara.edara.service.impl;
 
-import com.edara.edara.model.dto.PersonResponse;
-import com.edara.edara.model.dto.UserRequest;
-import com.edara.edara.model.dto.UserResponse;
+import com.edara.edara.model.dto.*;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.Role;
 import com.edara.edara.model.mapper.UserMapper;
 import com.edara.edara.repository.UserRepo;
 import com.edara.edara.service.PersonService;
 import com.edara.edara.service.UserService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,19 +26,45 @@ public class UserServiceImpl implements UserService  {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PersonService personService;
-    //private final PasswordEncoder passwordEncoder;
-    @PersistenceContext
-    private EntityManager entityManager;
 
+    //private final PasswordEncoder passwordEncoder;
+
+    private void throwExceptionIfUserNameAlreadyExist(String account) {
+        Optional<User> user = getEntityByAccount(account);
+        if(user.isPresent())
+            throw new RuntimeException("This account is already exist.");
+    }
+
+    private Long getNextId(){
+        Long lastId = userRepo.getLastId();
+        if(lastId == null)
+            return 0L;
+        else
+            return ++lastId;
+    }
+    private String hashIdToSixDigit(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = digest.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, encodedhash);
+            BigInteger maxDigits = new BigInteger("1000000"); // 10^6
+            BigInteger reducedNumber = number.mod(maxDigits);
+            return String.format("%06d", reducedNumber); // Ensure it is 6 digits with leading zeros if necessary
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private String generateUniquePersonalCode(String firstName, String lastName) {
-        Long sequenceValue = (Long) entityManager.createNativeQuery("SELECT user_personal_code_seq.NEXTVAL FROM DUAL").getSingleResult();
-        String randomDigits = String.format("%05d", sequenceValue % 100000);
-        String initials = (firstName.charAt(0) + String.valueOf(lastName.charAt(0))).toLowerCase();
-        return initials + randomDigits;
+        String prefix = firstName.substring(0, 1).toLowerCase() + lastName.substring(0, 1).toLowerCase();
+        Long nextId = getNextId();
+        String sequenceNumber = hashIdToSixDigit(nextId.toString());
+        return prefix + sequenceNumber;
     }
+
     @Override
     public UserResponse add(UserRequest userRequest) {
+        throwExceptionIfUserNameAlreadyExist(userRequest.getAccount());
         User newUser = userMapper.toEntity(userRequest);
         newUser.setRole(Role.USER);
         newUser.setDateOfJoining(new Date());
@@ -81,8 +106,20 @@ public class UserServiceImpl implements UserService  {
     }
 
     @Override
-    public PersonResponse editProfile(Long userId,UserRequest userRequest){
-        return personService.editProfile(userId,userRequest);
+    public PersonResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
+        return personService.editProfile(userId,editProfileRequest);
+    }
+
+    @Override
+    public Optional<User> getEntityByAccount(String account) {
+        return userRepo.findByAccount(account);
+    }
+
+    @Override
+    public User getByAccount(String account) {
+        return getEntityByAccount(account).orElseThrow(
+                () -> new NoSuchElementException("There is no user with account = " + account)
+        );
     }
 
     @Override

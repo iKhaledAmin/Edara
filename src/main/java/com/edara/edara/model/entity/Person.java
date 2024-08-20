@@ -39,9 +39,11 @@ public abstract class Person {
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private String image;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
     private String phoneNumber;
     private String country;
     private String city;
+    @Enumerated(EnumType.STRING)
     private Role role;
 }

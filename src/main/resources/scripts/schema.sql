@@ -1,5 +1,0 @@
---CREATE SEQUENCE user_personal_code_seq
---START WITH 10000
---INCREMENT BY 1
---NOMAXVALUE
---NOCYCLE;

@@ -1,14 +1,18 @@
 package com.edara.edara.service;
 
-import com.edara.edara.model.dto.PersonResponse;
-import com.edara.edara.model.dto.UserRequest;
-import com.edara.edara.model.dto.UserResponse;
+import com.edara.edara.model.dto.*;
 import com.edara.edara.model.entity.User;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public interface UserService extends CrudService<UserRequest, User, UserResponse,Long> {
     UserResponse register(UserRequest userRequest);
-     PersonResponse editProfile(Long userId, UserRequest userRequest);
+    PersonResponse editProfile(Long userId, EditProfileRequest editProfileRequest);
+
+    Optional<User> getEntityByAccount(String account);
+    User getByAccount(String account);
+
 
 }

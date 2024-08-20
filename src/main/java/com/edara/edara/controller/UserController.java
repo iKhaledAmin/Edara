@@ -1,6 +1,7 @@
 package com.edara.edara.controller;
 
 
+import com.edara.edara.model.dto.EditProfileRequest;
 import com.edara.edara.model.dto.UserRequest;
 import com.edara.edara.service.UserService;
 import jakarta.validation.Valid;
@@ -26,17 +27,17 @@ public class UserController {
         }
     }
 
-    @PutMapping("/edit-profile/{user-id}")
-    public ResponseEntity<?> editProfile(@RequestBody @Valid UserRequest userRequest, @PathVariable Long userId){
+    @PutMapping("/edit-profile/{userId}")
+    public ResponseEntity<?> editProfile(@RequestBody @Valid EditProfileRequest editProfileRequest, @PathVariable Long userId){
         try {
-            return new ResponseEntity<>(this.userService.editProfile(userId,userRequest), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(this.userService.editProfile(userId,editProfileRequest), HttpStatus.ACCEPTED);
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
                     body("An exception occurred: " + ex.getMessage());
         }
     }
 
-    @GetMapping("/get-by-id/{user-id}")
+    @GetMapping("/get-by-id/{userId}")
     public ResponseEntity<?> getCustomerById(@PathVariable Long userId){
         try {
             return new ResponseEntity<>(this.userService.getResponseById(userId),HttpStatus.OK);
