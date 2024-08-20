@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService  {
     //private final PasswordEncoder passwordEncoder;
 
     private void throwExceptionIfUserNameAlreadyExist(String account) {
-        Optional<User> user = getEntityByAccount(account);
+        Optional<User> user = getEntityByUserName(account);
         if(user.isPresent())
-            throw new RuntimeException("This account is already exist.");
+            throw new RuntimeException("This userName is already exist.");
     }
 
     private Long getNextId(){
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService  {
 
     @Override
     public UserResponse add(UserRequest userRequest) {
-        throwExceptionIfUserNameAlreadyExist(userRequest.getAccount());
+        throwExceptionIfUserNameAlreadyExist(userRequest.getUserName());
         User newUser = userMapper.toEntity(userRequest);
         newUser.setRole(Role.USER);
         newUser.setDateOfJoining(new Date());
@@ -111,14 +111,14 @@ public class UserServiceImpl implements UserService  {
     }
 
     @Override
-    public Optional<User> getEntityByAccount(String account) {
-        return userRepo.findByAccount(account);
+    public Optional<User> getEntityByUserName(String userName) {
+        return userRepo.findByUserName(userName);
     }
 
     @Override
-    public User getByAccount(String account) {
-        return getEntityByAccount(account).orElseThrow(
-                () -> new NoSuchElementException("There is no user with account = " + account)
+    public User getByUserName(String userName) {
+        return getEntityByUserName(userName).orElseThrow(
+                () -> new NoSuchElementException("There is no user with userName = " + userName)
         );
     }
 

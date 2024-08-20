@@ -14,7 +14,7 @@ public interface PersonService {
      PersonResponse editProfile(Long personId, EditProfileRequest editProfileRequest);
      Optional<Person> getEntityById(Long id);
      Person getById(Long personId);
-     Optional<Person> getEntityByAccount(String account);
-     Person getByAccount(String account);
+     Optional<Person> getEntityByUserName(String account);
+     Person getByUserName(String userName);
 
 }

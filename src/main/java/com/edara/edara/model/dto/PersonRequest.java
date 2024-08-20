@@ -34,12 +34,12 @@ public class PersonRequest {
     private String lastName;
 
 
-    @JsonProperty("account")
+    @JsonProperty("user_name")
     //@Size(min = 5 ,message = "User name must be more than 5 letters")
     //@Size(max = 20 ,message = "Last name must be less than 20 letters")
-    @NotNull(message = "Account Must Not Be Null")
-    @NotEmpty(message = "Account Must Not Be Empty")
-    private String account ;
+    @NotNull(message = "User name Must Not Be Null")
+    @NotEmpty(message = "User name Must Not Be Empty")
+    private String userName ;
 
     @JsonProperty("password")
     @NotNull(message = "Password must not be null")

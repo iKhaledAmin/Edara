@@ -28,8 +28,8 @@ public class PersonResponse {
     private String lastName;
 
 
-    @JsonProperty("account")
-    private String account ;
+    @JsonProperty("user_name")
+    private String userName ;
 
     @JsonProperty("password")
     private String password;

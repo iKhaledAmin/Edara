@@ -67,14 +67,14 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Optional<Person> getEntityByAccount(String account) {
-        return personRepo.findByAccount(account);
+    public Optional<Person> getEntityByUserName(String account) {
+        return personRepo.findByUserName(account);
     }
 
     @Override
-    public Person getByAccount(String account) {
-        return getEntityByAccount(account).orElseThrow(
-                () -> new NoSuchElementException("There is no person with account = " + account)
+    public Person getByUserName(String account) {
+        return getEntityByUserName(account).orElseThrow(
+                () -> new NoSuchElementException("There is no person with userName = " + account)
         );
     }
 

@@ -11,8 +11,8 @@ public interface UserService extends CrudService<UserRequest, User, UserResponse
     UserResponse register(UserRequest userRequest);
     PersonResponse editProfile(Long userId, EditProfileRequest editProfileRequest);
 
-    Optional<User> getEntityByAccount(String account);
-    User getByAccount(String account);
+    Optional<User> getEntityByUserName(String account);
+    User getByUserName(String account);
 
 
 }

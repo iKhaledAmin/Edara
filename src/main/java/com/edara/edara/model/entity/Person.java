@@ -31,7 +31,7 @@ public abstract class Person {
     private String firstName;
     private String lastName;
     @Column(unique = true)
-    private String account ;
+    private String userName;
     private String password;
     private String email;
     @JsonFormat(pattern="yyyy-MM-dd")
