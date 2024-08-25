@@ -1,11 +1,8 @@
 package com.edara.edara.service;
 
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public interface CrudService <Request, Entity, Response, ID> {
     public Response add(Request request);
 

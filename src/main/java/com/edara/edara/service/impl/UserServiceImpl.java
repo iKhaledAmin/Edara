@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService  {
     //private final PasswordEncoder passwordEncoder;
 
     private void throwExceptionIfUserNameAlreadyExist(String account) {
-        Optional<User> user = getEntityByUserName(account);
-        if(user.isPresent())
-            throw new RuntimeException("This userName is already exist.");
+        getEntityByUserName(account)
+                .ifPresent(user -> { throw new RuntimeException("This userName is already exist.");
+                });
     }
 
     private Long getNextId(){
