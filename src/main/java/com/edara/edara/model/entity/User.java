@@ -21,6 +21,9 @@ import java.util.Date;
 @Table(name = "user")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class User extends Person{
+
+
+    private String profession;
     private String personalCode;
     private Long NumberOfProjects;
     @JsonFormat(pattern="yyyy-MM-dd")

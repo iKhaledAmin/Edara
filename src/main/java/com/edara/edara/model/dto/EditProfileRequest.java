@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditProfileRequest extends PersonRequest {
+public class EditProfileRequest extends UserRequest {
     @JsonProperty("role")
     private Role role;
 }

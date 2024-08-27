@@ -1,6 +1,8 @@
 package com.edara.edara.service.impl;
 
-import com.edara.edara.model.dto.*;
+import com.edara.edara.model.dto.EditProfileRequest;
+import com.edara.edara.model.dto.UserRequest;
+import com.edara.edara.model.dto.UserResponse;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.Role;
 import com.edara.edara.model.mapper.UserMapper;
@@ -9,6 +11,7 @@ import com.edara.edara.service.PersonService;
 import com.edara.edara.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -26,12 +29,11 @@ public class UserServiceImpl implements UserService  {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PersonService personService;
-
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     private void throwExceptionIfUserNameAlreadyExist(String account) {
         getEntityByUserName(account)
-                .ifPresent(user -> { throw new RuntimeException("This userName is already exist.");
+                .ifPresent(user -> { throw new RuntimeException("This user name is already exist.");
                 });
     }
 
@@ -71,8 +73,8 @@ public class UserServiceImpl implements UserService  {
         newUser.setPersonalCode(
                 generateUniquePersonalCode(newUser.getFirstName(),newUser.getLastName())
         );
-//        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
-//        newUser.setPassword(hashedPassword);
+        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(hashedPassword);
         newUser = userRepo.save(newUser);
 
         return userMapper.toResponse(newUser);
@@ -106,8 +108,9 @@ public class UserServiceImpl implements UserService  {
     }
 
     @Override
-    public PersonResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
-        return personService.editProfile(userId,editProfileRequest);
+    public UserResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
+        User user = (User) personService.editProfile(userId,editProfileRequest);
+        return userMapper.toResponse(user);
     }
 
     @Override

@@ -12,9 +12,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class UserRequest extends PersonRequest{
 
-    @JsonProperty("personal_code")
-    private String personalCode;
+    @JsonProperty("profession")
+    private String profession;
 
-    @JsonProperty("number_of_projects")
-    private Long NumberOfProjects;
 }

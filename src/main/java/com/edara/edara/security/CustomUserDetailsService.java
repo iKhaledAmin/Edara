@@ -13,18 +13,19 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final PersonService personService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Person person = personService.getEntityByUserName(username).orElseThrow(
-                () -> new UsernameNotFoundException("There is no user with username = " + username)
+                () -> new UsernameNotFoundException("There is no user with user name = " + username)
         );
 
-            return CustomUserDetails.builder()
-                    .id(person.getId())
-                    .userName(person.getUserName())
-                    .role(person.getRole())
-                    .password(person.getPassword())
-                    .build();
+        return CustomUserDetails.builder()
+                .id(person.getId())
+                .userName(person.getUserName())
+                .role(person.getRole())
+                .password(person.getPassword())
+                .build();
 
     }
 }
