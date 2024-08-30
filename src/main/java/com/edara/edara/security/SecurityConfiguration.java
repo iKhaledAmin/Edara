@@ -143,7 +143,7 @@ public class SecurityConfiguration {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrfConfig -> csrfConfig.disable()) // Consider enabling CSRF protection
             .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasRole("USER")
+                .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasAuthority("USER")
                 .requestMatchers("/auth/login", "/users/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
@@ -179,5 +179,9 @@ public class SecurityConfiguration {
         return configuration.getAuthenticationManager();
     }
 
+//    @Bean
+//    public CompromisedPasswordChecker compromisedPasswordChecker() {
+//        return new HaveIBeenPwnedRestApiPasswordChecker();
+//    }
 
 }

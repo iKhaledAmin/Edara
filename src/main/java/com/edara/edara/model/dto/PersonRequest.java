@@ -20,31 +20,30 @@ import java.util.Date;
 public class PersonRequest {
 
     @JsonProperty("first_name")
-    @NotNull(message = "First Name Must Not Be Null")
-    @NotEmpty(message = "First Name Must Not Be Empty")
-    //@Size(min = 3 ,message = "First name Must be more than 3 letters")
-    //@Size(max = 20 ,message = "First name Must be less than 20 letters")
+    @NotNull(message = "First name must not be null")
+    @NotEmpty(message = "First name must not be mpty")
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "First name must contain only letters")
+    @Size(min = 3, max = 50, message = "First name must be between 3 and 50 characters")
     private String firstName;
 
     @JsonProperty("last_name")
-    @NotNull(message = "First Name Must Not Be Null")
-    @NotEmpty(message = "First Name Must Not Be Empty")
-    //@Size(min = 3 ,message = "First name Must be more than 3 letters")
-    @Size(max = 20 ,message = "First name Must be less than 20 letters")
+    @NotNull(message = "Lirst name must Not Be Null")
+    @NotEmpty(message = "Lirst name must Not Be Empty")
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "Last name must contain only letters")
+    @Size(min = 3, max = 50, message = "Last name must be between 3 and 50 characters")
     private String lastName;
 
 
     @JsonProperty("user_name")
-    //@Size(min = 5 ,message = "User name must be more than 5 letters")
-    //@Size(max = 20 ,message = "Last name must be less than 20 letters")
-    @NotNull(message = "User name Must Not Be Null")
-    @NotEmpty(message = "User name Must Not Be Empty")
+    @NotNull(message = "User name must not be null")
+    @NotEmpty(message = "User name must not be empty")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@edara\\.com$", message = "User name must follow the format username@edara.com")
     private String userName ;
 
     @JsonProperty("password")
     @NotNull(message = "Password must not be null")
     @NotEmpty(message = "Password must not be empty")
-    //@Size(max = 20, min = 8, message = "student_password Must Be Between 8 and 20 character.")
+    @Size(min = 3, max = 50, message = "Password name must be between 3 and 50 characters")
     private String password;
 
 
@@ -54,6 +53,7 @@ public class PersonRequest {
 
     @JsonProperty("birthday")
     @JsonFormat(pattern="yyyy-MM-dd")
+    @Past(message = "Birthday must be a past date")
     private Date birthday;
 
     @JsonProperty("image")
@@ -69,9 +69,11 @@ public class PersonRequest {
     private String phoneNumber;
 
     @JsonProperty("country")
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "Country must contain only letters")
     private String country;
 
     @JsonProperty("city")
+    @Pattern(regexp = "^[a-zA-Z]+$", message = "city must contain only letters")
     private String city;
 
 

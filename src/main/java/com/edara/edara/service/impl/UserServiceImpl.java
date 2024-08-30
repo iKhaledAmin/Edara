@@ -110,6 +110,7 @@ public class UserServiceImpl implements UserService  {
     @Override
     public UserResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
         User user = (User) personService.editProfile(userId,editProfileRequest);
+        user.setProfession(editProfileRequest.getProfession());
         return userMapper.toResponse(user);
     }
 
