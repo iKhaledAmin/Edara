@@ -11,7 +11,6 @@ import com.edara.edara.service.PersonService;
 import com.edara.edara.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -29,7 +28,7 @@ public class UserServiceImpl implements UserService  {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PersonService personService;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
 
     private void throwExceptionIfUserNameAlreadyExist(String account) {
         getEntityByUserName(account)
@@ -73,8 +72,8 @@ public class UserServiceImpl implements UserService  {
         newUser.setPersonalCode(
                 generateUniquePersonalCode(newUser.getFirstName(),newUser.getLastName())
         );
-        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
-        newUser.setPassword(hashedPassword);
+        //String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+        //newUser.setPassword(hashedPassword);
         newUser = userRepo.save(newUser);
 
         return userMapper.toResponse(newUser);
@@ -110,7 +109,10 @@ public class UserServiceImpl implements UserService  {
     @Override
     public UserResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
         User user = (User) personService.editProfile(userId,editProfileRequest);
+
         user.setProfession(editProfileRequest.getProfession());
+        user = updateEntity(userId,user);
+
         return userMapper.toResponse(user);
     }
 
