@@ -1,12 +1,16 @@
 package com.edara.edara.security;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class LoginRequest {
-    @NotNull
+    @JsonProperty("user_name")
+    @NotNull(message = "User name must not be null")
     private String userName;
-    @NotNull
+
+    @JsonProperty("password")
+    @NotNull(message = "Password must not be null")
     private String password;
 }

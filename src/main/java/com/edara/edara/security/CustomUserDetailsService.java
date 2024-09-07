@@ -1,35 +1,31 @@
 package com.edara.edara.security;
 
-import com.edara.edara.model.entity.User;
-import com.edara.edara.service.UserService;
+import com.edara.edara.model.entity.Person;
+import com.edara.edara.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final PersonService personService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userService.getEntityByUserName(username);
-        user.orElseThrow((() -> new UsernameNotFoundException("User not found.")));
+        Person person = personService.getEntityByUserName(username).orElseThrow(
+                () -> new UsernameNotFoundException("There is no user with user name = " + username)
+        );
 
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            return CustomUserDetails.builder()
-                    .id(existingUser.getId())
-                    .userName(existingUser.getUserName())
-                    .role(existingUser.getRole())
-                    .password(existingUser.getPassword())
-                    .build();
-        }
-        return null;
+        return CustomUserDetails.builder()
+                .id(person.getId())
+                .userName(person.getUserName())
+                .role(person.getRole())
+                .password(person.getPassword())
+                .build();
+
     }
 }
