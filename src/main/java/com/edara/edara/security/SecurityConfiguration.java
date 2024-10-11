@@ -36,39 +36,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-
-//    @Bean
-//    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-//        CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
-//        http.securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-//                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
-//                .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
-//                    @Override
-//                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//                        CorsConfiguration config = new CorsConfiguration();
-//                        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-//                        config.setAllowedMethods(Collections.singletonList("*"));
-//                        config.setAllowCredentials(true);
-//                        config.setAllowedHeaders(Collections.singletonList("*"));
-//                        config.setMaxAge(3600L);
-//                        return config;
-//                    }
-//                }))
-//                .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-//                        .ignoringRequestMatchers( "/contact","/register")
-//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-//                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
-//                //.requiresChannel(rcc -> rcc.anyRequest().requiresInsecure()) // Only HTTP
-//                .authorizeHttpRequests((requests) -> requests
-//                        .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasAuthority("USER")
-//                        .requestMatchers("/auth/login","/auth/user", "/users/register").permitAll());
-//        http.formLogin(withDefaults());
-//        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
-//        http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
-//        return http.build();
-//    }
-
-
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();

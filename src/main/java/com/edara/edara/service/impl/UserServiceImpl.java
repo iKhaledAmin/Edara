@@ -116,7 +116,6 @@ public class UserServiceImpl implements UserService  {
 
         user.setProfession(editProfileRequest.getProfession());
         user = updateEntity(userId,user);
-
         return userMapper.toResponse(user);
     }
 
