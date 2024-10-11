@@ -1,35 +1,35 @@
 package com.edara.edara.security;
 
-import com.edara.edara.model.entity.User;
-import com.edara.edara.service.UserService;
+import com.edara.edara.model.entity.Person;
+import com.edara.edara.service.PersonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final PersonService personService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userService.getEntityByUserName(username);
-        user.orElseThrow((() -> new UsernameNotFoundException("User not found.")));
+        Person person = personService.getByUserName(username);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(person.getRole().toString()));
 
-        if (user.isPresent()) {
-            User existingUser = user.get();
-            return CustomUserDetails.builder()
-                    .id(existingUser.getId())
-                    .userName(existingUser.getUserName())
-                    .role(existingUser.getRole())
-                    .password(existingUser.getPassword())
-                    .build();
-        }
-        return null;
+//        List<GrantedAuthority> authorities = person.getRole().stream().map(authority -> new
+//                SimpleGrantedAuthority(authority.getName())).collect(Collectors.toList());
+
+        return new User(person.getUserName(), person.getPassword(), authorities);
     }
 }

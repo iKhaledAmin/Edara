@@ -12,6 +12,7 @@ import com.edara.edara.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -28,7 +29,8 @@ public class UserServiceImpl implements UserService  {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PersonService personService;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
 
     private void throwExceptionIfUserNameAlreadyExist(String account) {
         getEntityByUserName(account)
@@ -72,8 +74,10 @@ public class UserServiceImpl implements UserService  {
         newUser.setPersonalCode(
                 generateUniquePersonalCode(newUser.getFirstName(),newUser.getLastName())
         );
-        //String hashedPassword = passwordEncoder.encode(newUser.getPassword());
-        //newUser.setPassword(hashedPassword);
+
+        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(hashedPassword);
+
         newUser = userRepo.save(newUser);
 
         return userMapper.toResponse(newUser);
