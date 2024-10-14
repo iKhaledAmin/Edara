@@ -2,10 +2,14 @@ package com.edara.edara.service.impl;
 
 import com.edara.edara.model.dto.ProjectRequest;
 import com.edara.edara.model.dto.ProjectResponse;
+import com.edara.edara.model.dto.TaskRequest;
+import com.edara.edara.model.dto.TaskResponse;
 import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Task;
 import com.edara.edara.model.mapper.ProjectMapper;
 import com.edara.edara.repository.ProjectRepo;
 import com.edara.edara.service.ProjectService;
+import com.edara.edara.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -23,6 +27,7 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepo projectRepo;
     private final ProjectMapper projectMapper;
+    private final TaskService taskService;
 
 //    private void throwExceptionIfUserHasProjetWithSameName(String projectName) {
 //        getEntityByprojectName(projectName)
@@ -118,5 +123,18 @@ public class ProjectServiceImpl implements ProjectService {
                 .stream()
                 .map(projectMapper::toResponse)
                 .toList();
+    }
+
+
+    public TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId) {
+
+        Task newTask = taskService.create(taskRequest);
+
+        Project project = getById(projectId);
+        project.getTasks().add(newTask);
+
+        projectRepo.save(project);
+
+        return taskService.toResponse(newTask);
     }
 }

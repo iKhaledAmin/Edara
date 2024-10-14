@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -29,6 +30,8 @@ public class Project {
     private String description;
 
     private String code;
+
+    @Enumerated(EnumType.STRING)
     private ProjectType type;
 
     @Lob
@@ -37,4 +40,13 @@ public class Project {
 
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date createdAt;
+
+    @OneToMany(mappedBy = "project",
+                fetch = FetchType.LAZY,
+                cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    private List<Task> tasks;
+
+//    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
+//    private List<Title> titles;
 }

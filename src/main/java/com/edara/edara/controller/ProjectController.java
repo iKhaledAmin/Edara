@@ -1,6 +1,7 @@
 package com.edara.edara.controller;
 
 import com.edara.edara.model.dto.ProjectRequest;
+import com.edara.edara.model.dto.TaskRequest;
 import com.edara.edara.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin("*")
 @RequestMapping("/projects")
 @AllArgsConstructor
 public class ProjectController {
@@ -35,5 +35,10 @@ public class ProjectController {
     public ResponseEntity<?> deleteById(@PathVariable Long projectId) {
         projectService.delete(projectId);
         return new ResponseEntity<>("Deleted Successfully", HttpStatus.ACCEPTED);
+    }
+
+    @PostMapping("/add-task/{projectId}")
+    public ResponseEntity<?> addTaskToProject(@RequestBody @Valid TaskRequest taskRequest, @PathVariable Long projectId) {
+        return new ResponseEntity<>(projectService.addTaskToProject(taskRequest,projectId), HttpStatus.CREATED);
     }
 }

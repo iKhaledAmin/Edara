@@ -16,14 +16,12 @@ import lombok.NoArgsConstructor;
 public class ProjectRequest {
 
 
-    @JsonProperty("name")
     @NotNull(message = "Project name must not be null")
     @NotEmpty(message = "Project name must not be mpty")
     @Pattern(regexp = "^[a-zA-Z]+$", message = "Project name must contain only letters")
     @Size(min = 3, max = 50, message = "Project name must be between 3 and 50 characters")
     private String name;
 
-    @JsonProperty("description")
     @NotNull(message = "Description must not be null")
     @NotEmpty(message = "Description must not be empty")
     @Size(max = 65535, message = "Description must not exceed 65535 characters")
