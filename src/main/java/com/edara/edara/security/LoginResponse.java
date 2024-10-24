@@ -9,6 +9,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @Data
 public class LoginResponse {
+    private Long id;
     private String userName;
     private String jwtToken;
     private Collection<? extends GrantedAuthority> authorities;

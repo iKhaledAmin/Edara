@@ -2,15 +2,14 @@ package com.edara.edara.model.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
+import java.util.List;
 
 @SuperBuilder
 @Data
@@ -28,4 +27,12 @@ public class User extends Person{
     private Long NumberOfProjects;
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date dateOfJoining;
+
+
+
+    @OneToMany(mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    private List<MemberShip> memberShips;
 }

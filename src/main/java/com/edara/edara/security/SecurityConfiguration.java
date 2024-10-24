@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,12 +24,9 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -65,6 +61,17 @@ public class SecurityConfiguration {
                 //.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) // Only HTTPS
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasAuthority("USER")
+                        .requestMatchers("/projects/add").hasAuthority("USER")
+                        .requestMatchers("/projects/get-by-id/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/delete/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/add-user").hasAuthority("USER")
+                        .requestMatchers("/projects/delete-user/{userId}/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/get-all-users/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/add-task/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/get-all-project-tasks/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/delete/{taskId}").hasAuthority("USER")
                         .requestMatchers("/auth/login", "/users/register").permitAll()
                 );
         //http.formLogin(withDefaults());
