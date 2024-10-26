@@ -79,11 +79,24 @@ public class ProjectServiceImpl implements ProjectService {
             throw new IllegalStateException("You already own a project with the same name.");
         }
     }
+
+
     @Override
-    public ProjectResponse add(ProjectRequest projectRequest) {
+    public ProjectResponse toResponse(Project project) {
+        return projectMapper.toResponse(project);
+    }
+
+    @Override
+    public Project toEntity(ProjectRequest projectRequest) {
+        return projectMapper.toEntity(projectRequest);
+    }
+
+    @Override
+    public Project create(ProjectRequest projectRequest) {
+
         throwExceptionIfUserHasProjectWithSameName(projectRequest.getName());
 
-        Project newProject = projectMapper.toEntity(projectRequest);
+        Project newProject = toEntity(projectRequest);
         newProject.setCode(generateUniqueProjectCode());
         newProject.setCreatedAt(new Date());
 
@@ -93,9 +106,18 @@ public class ProjectServiceImpl implements ProjectService {
         MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER);
         newProject.getMemberShips().add(memberShip);
 
-        projectRepo.save(newProject);
+        return newProject;
+    }
 
-        return projectMapper.toResponse(newProject);
+    @Override
+    public Project save(Project project) {
+        return projectRepo.save(project);
+    }
+
+    @Override
+    public ProjectResponse add(ProjectRequest projectRequest) {
+        Project newProject = create(projectRequest);
+        return toResponse(save(newProject));
     }
 
     @Override

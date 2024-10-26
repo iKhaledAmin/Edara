@@ -65,8 +65,19 @@ public class UserServiceImpl implements UserService  {
         return prefix + sequenceNumber;
     }
 
+
     @Override
-    public UserResponse add(UserRequest userRequest) {
+    public UserResponse toResponse(User user) {
+        return userMapper.toResponse(user);
+    }
+
+    @Override
+    public User toEntity(UserRequest userRequest) {
+        return userMapper.toEntity(userRequest);
+    }
+
+    @Override
+    public User create(UserRequest userRequest) {
         throwExceptionIfUserNameAlreadyExist(userRequest.getUserName());
         User newUser = userMapper.toEntity(userRequest);
         newUser.setRole(Role.USER);
@@ -78,9 +89,18 @@ public class UserServiceImpl implements UserService  {
         String hashedPassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(hashedPassword);
 
-        newUser = userRepo.save(newUser);
+        return newUser;
+    }
 
-        return userMapper.toResponse(newUser);
+    @Override
+    public User save(User user) {
+        return userRepo.save(user);
+    }
+
+    @Override
+    public UserResponse add(UserRequest userRequest) {
+        User newUser = create(userRequest);
+        return toResponse( save(newUser));
     }
 
     @Override

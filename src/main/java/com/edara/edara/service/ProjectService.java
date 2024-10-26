@@ -11,6 +11,7 @@ import java.util.List;
 
 @Service
 public interface ProjectService extends CrudService<ProjectRequest, Project, ProjectResponse,Long> {
+    public ProjectResponse add(ProjectRequest projectRequest);
 
     MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest);
     void deleteUserFromProject(Long userId, Long projectId);

@@ -51,13 +51,17 @@ public class TaskServiceImpl implements TaskService {
         return sequenceNumber;
     }
 
+    @Override
     public Task toEntity(TaskRequest taskRequest) {
         return taskMapper.toEntity(taskRequest);
     }
+
+    @Override
     public TaskResponse toResponse(Task task) {
         return taskMapper.toResponse(task);
     }
 
+    @Override
     public Task create(TaskRequest taskRequest){
         Task newTask = taskMapper.toEntity(taskRequest);
         newTask.setCode(generateUniqueTaskCode());

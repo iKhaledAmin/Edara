@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Service
 public interface UserService extends CrudService<UserRequest, User, UserResponse,Long> {
+    public UserResponse add(UserRequest userRequest);
     UserResponse register(UserRequest userRequest);
     PersonResponse editProfile(Long userId, EditProfileRequest editProfileRequest);
 

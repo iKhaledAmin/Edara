@@ -42,10 +42,7 @@ public class MemberShipServiceImpl implements MemberShipService {
         return memberShipRepo.findByUserIdAndProjectId(userId, projectId);
     }
 
-    @Override
-    public MemberShipResponse add(MemberShipRequest memberShipRequest) {
-        return null;
-    }
+
 
     @Override
     public MemberShip updateEntity(Long aLong, MemberShip newEntity) {

@@ -4,19 +4,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CrudService <Request, Entity, Response, ID> {
-    public Response add(Request request);
 
-    public Entity updateEntity(ID id , Entity newEntity);
-    public Response update(ID id , Request request);
+     Response toResponse(Entity entity);
+     Entity toEntity(Request request);
 
-    public void delete(ID id);
+     Entity create(Request request);
+     Entity save(Entity entity);
 
-    public Optional<Entity> getEntityById(ID id);
+     Entity updateEntity(ID id , Entity newEntity);
+     Response update(ID id , Request request);
 
-    public Entity getById(ID id);
+     void delete(ID id);
 
-    public Response getResponseById(ID id);
-
-    public List<Response> getAll();
+     Optional<Entity> getEntityById(ID id);
+     Entity getById(ID id);
+     Response getResponseById(ID id);
+     List<Response> getAll();
 
 }

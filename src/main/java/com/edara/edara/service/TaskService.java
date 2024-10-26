@@ -7,9 +7,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface TaskService extends CrudService<TaskRequest, Task, TaskResponse,Long> {
-    public TaskResponse toResponse(Task task) ;
-    public Task toEntity(TaskRequest taskRequest);
-    public Task create(TaskRequest taskRequest);
-    public Task save(Task task);
+     TaskResponse add(TaskRequest taskRequest);
 
 }
