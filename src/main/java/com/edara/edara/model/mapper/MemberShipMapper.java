@@ -14,6 +14,7 @@ public interface MemberShipMapper {
     @Mapping(target = "uerName" , source = "entity.user.userName")
     @Mapping(target = "userId" , source = "entity.user.id")
     @Mapping(target = "projectName" , source = "entity.project.name")
+    @Mapping(target = "joinDate" , source = "entity.createdAt")
     MemberShipResponse toResponse(MemberShip entity);
 
 

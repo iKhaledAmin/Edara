@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -98,7 +97,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project newProject = toEntity(projectRequest);
         newProject.setCode(generateUniqueProjectCode());
-        newProject.setCreatedAt(new Date());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getByUserName(authentication.getName());

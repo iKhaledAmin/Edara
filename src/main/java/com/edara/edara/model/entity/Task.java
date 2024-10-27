@@ -13,9 +13,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 
+
 @Entity
 @Table(name = "task")
-public class Task {
+public class Task extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_id")

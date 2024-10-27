@@ -8,12 +8,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
 
-@SuperBuilder
+//@SuperBuilder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +21,7 @@ import java.util.Date;
 @Entity
 @Table(name = "person")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Person {
+public abstract class Person extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
