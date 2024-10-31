@@ -40,7 +40,7 @@ public class Project extends BaseEntity {
 
     @OneToMany(mappedBy = "project",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.ALL, //Deletes all MemberShips entities when the Project is deleted.
             orphanRemoval = true  // If you remove one of the MemberShip objects from the memberShips list
                                   // JPA will automatically delete that MemberShip from the database as well.
     )
@@ -48,7 +48,7 @@ public class Project extends BaseEntity {
 
     @OneToMany(mappedBy = "project",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.ALL, //Deletes all Tasks entities when the Project is deleted.
             orphanRemoval = true
     )
     private List<Task> tasks = new ArrayList<>();

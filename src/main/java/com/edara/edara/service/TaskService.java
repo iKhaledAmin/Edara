@@ -5,8 +5,12 @@ import com.edara.edara.model.dto.TaskResponse;
 import com.edara.edara.model.entity.Task;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public interface TaskService extends CrudService<TaskRequest, Task, TaskResponse,Long> {
      TaskResponse add(TaskRequest taskRequest);
+     List<Task> getAllTasksByUserId(Long userId);
+      TaskResponse finishTask(Long taskId);
 
 }

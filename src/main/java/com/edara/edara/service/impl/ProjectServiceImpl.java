@@ -6,6 +6,7 @@ import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Task;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.ProjectRole;
+import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.ProjectMapper;
 import com.edara.edara.repository.ProjectRepo;
 import com.edara.edara.service.MemberShipService;
@@ -16,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -208,8 +210,7 @@ public class ProjectServiceImpl implements ProjectService {
         return memberShipService.save(newMemberShip);
     }
 
-
-
+    @Override
     public MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest) {
 
         User user = userService.getByUserName(memberShipRequest.getUserName());
@@ -219,6 +220,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         return memberShipService.toResponse(newMemberShip);
     }
+    @Override
     public void deleteUserFromProject(Long userId, Long projectId) {
 
         User user = userService.getById(userId);
@@ -233,7 +235,8 @@ public class ProjectServiceImpl implements ProjectService {
         memberShipService.delete(membershipToRemove.getId());
     }
 
-    public List<MemberShipResponse> getResponseAllByProjectId(Long projectId) {
+    @Override
+    public List<MemberShipResponse> getResponseAllUsersByProjectId(Long projectId) {
         Project project = getById(projectId);
         return project.getMemberShips().stream()
                 .map(memberShipService::toResponse)
@@ -241,21 +244,73 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
+    private void throwExceptionIfProjectIncludeTaskWithSameName(String taskName , Project project) {
+
+        boolean hasSameTaskName = project.getTasks().stream()
+                .anyMatch(task -> task.getName().equalsIgnoreCase(taskName));
+
+        if (hasSameTaskName) {
+            throw new RuntimeException("Task with same name already exists in this project.");
+        }
+    }
+    @Override
     public TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId) {
+
+        Project project = getById(projectId);
+        throwExceptionIfProjectIncludeTaskWithSameName(taskRequest.getName(), project);
 
         Task newTask = taskService.create(taskRequest);
 
-        Project project = getById(projectId);
         project.getTasks().add(newTask);
-
         newTask.setProject(project);
 
         newTask = taskService.save(newTask);
-
+        if (taskRequest.getEmployeeId() != null) {
+            return assignTaskToMember(newTask.getId(), taskRequest.getEmployeeId());
+        }
         return taskService.toResponse(newTask);
     }
 
+    private void throwExceptionIfTaskOnWorking(Task task) {
 
+        if (task.getStatus().equals(TaskStatus.IN_PROGRESS)) {
+            throw new RuntimeException("Task is already in on working.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteTaskFromProject(Long taskId) {
+        Task task = taskService.getById(taskId);
+        throwExceptionIfTaskOnWorking(task);
+        Project project = getById(task.getProject().getId());
+        project.getTasks().remove(task); // This triggers deletion of task due to orphanRemoval = true
+    }
+
+    private void throwExceptionIfTaskAlreadyAssignedToEmployee(Task task) {
+
+        if (task.getMember() != null) {
+            throw new RuntimeException("Task already assigned to employee.");
+        }
+
+    }
+    private Task assignTaskToMember(Task task, MemberShip member) {
+
+        throwExceptionIfTaskAlreadyAssignedToEmployee(task);
+        task.setMember(member);
+        task.setStatus(TaskStatus.IN_PROGRESS);
+
+        member.getTasks().add(task);
+
+        return taskService.save(task);
+    }
+    public TaskResponse assignTaskToMember(Long taskId, Long userId) {
+        Task task = taskService.getById(taskId);
+        MemberShip member = memberShipService.getByUserIdAndProjectId(userId, task.getProject().getId());
+        Task aasignedTask = assignTaskToMember(task, member);
+
+        return taskService.toResponse(aasignedTask);
+    }
 
     public List<Task> getAllTasksByProjectId(Long projectId) {
         Project project = getById(projectId);
@@ -264,6 +319,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     public List<TaskResponse> getResponseAllTasksByProjectId(Long projectId) {
         List<Task> projectTasks = getAllTasksByProjectId(projectId);
+        return projectTasks.stream().map(taskService::toResponse).toList();
+    }
+
+    public List<Task> getAllTasksByUserId(Long userId) {
+        return taskService.getAllTasksByUserId(userId);
+    }
+    public List<TaskResponse> getResponseAllTasksByUserId(Long userId) {
+        List<Task> projectTasks = getAllTasksByUserId(userId);
         return projectTasks.stream().map(taskService::toResponse).toList();
     }
 

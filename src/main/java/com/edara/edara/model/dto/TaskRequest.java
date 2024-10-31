@@ -1,6 +1,7 @@
 package com.edara.edara.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,5 +30,8 @@ public class TaskRequest {
     @Future(message = "Deadline must be a future date")
     @JsonFormat(pattern="yyyy-MM-dd-hh-mm")
     private Date deadline;
+
+    @JsonProperty("employee_id")
+    private Long employeeId;
 
 }

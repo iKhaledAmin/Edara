@@ -13,13 +13,21 @@ import java.util.List;
 public interface ProjectService extends CrudService<ProjectRequest, Project, ProjectResponse,Long> {
     public ProjectResponse add(ProjectRequest projectRequest);
 
+
     MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest);
     void deleteUserFromProject(Long userId, Long projectId);
+     List<MemberShipResponse> getResponseAllUsersByProjectId(Long projectId);
 
-     List<MemberShipResponse> getResponseAllByProjectId(Long projectId);
 
      TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId);
-     List<Task> getAllTasksByProjectId(Long projectId);
+     void deleteTaskFromProject(Long taskId);
+     TaskResponse assignTaskToMember(Long taskId, Long userId);
+
+
+    List<Task> getAllTasksByProjectId(Long projectId);
      List<TaskResponse> getResponseAllTasksByProjectId(Long projectId);
 
+
+    public List<Task> getAllTasksByUserId(Long userId);
+    public List<TaskResponse> getResponseAllTasksByUserId(Long userId);
 }

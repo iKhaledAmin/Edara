@@ -2,6 +2,7 @@ package com.edara.edara.model.dto;
 
 import com.edara.edara.model.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -25,4 +26,10 @@ public class TaskResponse {
 
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
+
+    @JsonProperty("employee_name")
+    private String employeeName;
+
+    @JsonProperty("project_name")
+    private String projectName;
 }

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,4 +40,11 @@ public class MemberShip extends BaseEntity{
     )
     @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
     private Project project;
+
+
+    @OneToMany(mappedBy = "member",
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    private List<Task> tasks;
 }

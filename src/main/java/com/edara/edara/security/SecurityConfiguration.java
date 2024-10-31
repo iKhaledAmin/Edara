@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                 }))
                 .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .ignoringRequestMatchers( "/users/register","/auth/login")
-                        //.ignoringRequestMatchers( "/**")
+                        .ignoringRequestMatchers( "/**")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
 //                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
@@ -70,9 +70,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/delete-user/{userId}/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-users/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/add-task/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/delete-task/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-project-tasks/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/get-all-user-tasks/{userId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/get-by-id/{taskId}").hasAuthority("USER")
                         .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
-                        .requestMatchers("/tasks/delete/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/finish-task/{taskId}").hasAuthority("USER")
                         .requestMatchers("/auth/login", "/users/register").permitAll()
                 );
         //http.formLogin(withDefaults());

@@ -42,4 +42,11 @@ public class Task extends BaseEntity {
     )
     @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
     private Project project;
+
+    @ManyToOne( fetch = FetchType.LAZY,
+            optional = true,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    @JoinColumn(name = "employee_id", referencedColumnName = "membership_id", nullable = true)
+    private MemberShip member;
 }

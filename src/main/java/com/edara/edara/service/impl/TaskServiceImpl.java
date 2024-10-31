@@ -7,8 +7,9 @@ import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.TaskMapper;
 import com.edara.edara.repository.TaskRepo;
 import com.edara.edara.service.TaskService;
+import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -24,6 +25,7 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepo taskRepo;
     private final TaskMapper taskMapper;
+    private final NonNullBeanUtils nonNullBeanUtils;
 
     private Long getNextId(){
         Long lastId = taskRepo.getLastId();
@@ -80,14 +82,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<Task> getAllTasksByUserId(Long userId) {
+        return taskRepo.findAllTasksByUserId(userId);
+    }
+
+    @SneakyThrows
+    @Override
     public Task updateEntity(Long taskId, Task newTask) {
         Task existedTask = getById(taskId);
 
         // Copy properties from newTask to existedTask, excluding the "id", "code", "project"
-        BeanUtils.copyProperties(newTask, existedTask, "id", "code",  "project");
-
-        // Save the updated task
-        //existedUser = userRepo.save(existedUser);
+        nonNullBeanUtils.copyProperties(newTask, existedTask, "id", "code",  "project","member");
 
         return save(existedTask);
     }
@@ -130,5 +135,14 @@ public class TaskServiceImpl implements TaskService {
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    private Task changeStatus(Long taskId, TaskStatus status) {
+        Task task = getById(taskId);
+        task.setStatus(status);
+        return save(task);
+    }
+    public TaskResponse finishTask(Long taskId) {
+        return toResponse(changeStatus(taskId, TaskStatus.COMPLETED));
     }
 }

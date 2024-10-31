@@ -14,14 +14,18 @@ import org.springframework.web.bind.annotation.*;
 public class TaskController {
     private final TaskService taskService;
 
+    @GetMapping("/get-by-id/{taskId}")
+    public ResponseEntity<?> getManagerById(@PathVariable Long taskId) {
+        return new ResponseEntity<>(this.taskService.getResponseById(taskId),HttpStatus.OK);
+    }
     @PutMapping("/update/{taskId}")
-    public ResponseEntity<?> updateProject(@RequestBody @Valid TaskRequest taskRequest, @PathVariable Long taskId) {
+    public ResponseEntity<?> updateTask(@RequestBody @Valid TaskRequest taskRequest, @PathVariable Long taskId) {
         return new ResponseEntity<>(taskService.update(taskId,taskRequest), HttpStatus.ACCEPTED);
     }
 
-    @DeleteMapping("/delete/{taskId}")
-    public ResponseEntity<?> deleteById(@PathVariable Long taskId) {
-        taskService.delete(taskId);
-        return new ResponseEntity<>("Deleted Successfully", HttpStatus.ACCEPTED);
+    @PutMapping("/finish-task/{taskId}")
+    public ResponseEntity<?> finishTask( @PathVariable Long taskId) {
+        return new ResponseEntity<>(taskService.finishTask(taskId), HttpStatus.ACCEPTED);
     }
+
 }
