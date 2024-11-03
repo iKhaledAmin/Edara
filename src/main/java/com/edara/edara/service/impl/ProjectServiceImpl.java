@@ -1,10 +1,7 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.model.dto.*;
-import com.edara.edara.model.entity.MemberShip;
-import com.edara.edara.model.entity.Project;
-import com.edara.edara.model.entity.Task;
-import com.edara.edara.model.entity.User;
+import com.edara.edara.model.entity.*;
 import com.edara.edara.model.enums.ProjectRole;
 import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.ProjectMapper;
@@ -12,6 +9,7 @@ import com.edara.edara.repository.ProjectRepo;
 import com.edara.edara.service.MemberShipService;
 import com.edara.edara.service.ProjectService;
 import com.edara.edara.service.TaskService;
+import com.edara.edara.service.TitleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
@@ -34,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final TaskService taskService;
     private final MemberShipService memberShipService;
     private final UserServiceImpl userService;
+    private final TitleService titleService;
 
 
 
@@ -331,5 +330,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
+    @Transactional
+    public TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId) {
+        Project project = getById(projectId);
+        Title title = titleService.add(titleRequest, project);
+        project.getTitles().add(title);
+
+        return titleService.toResponse(title);
+    }
 
 }

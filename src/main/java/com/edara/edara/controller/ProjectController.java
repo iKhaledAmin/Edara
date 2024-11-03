@@ -3,6 +3,7 @@ package com.edara.edara.controller;
 import com.edara.edara.model.dto.MemberShipRequest;
 import com.edara.edara.model.dto.ProjectRequest;
 import com.edara.edara.model.dto.TaskRequest;
+import com.edara.edara.model.dto.TitleRequest;
 import com.edara.edara.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -82,6 +83,11 @@ public class ProjectController {
     @GetMapping("/get-all-user-tasks/{userId}")
     ResponseEntity<?> getAllTasksByUserId( @PathVariable Long userId){
         return new ResponseEntity<>(this.projectService.getResponseAllTasksByUserId(userId), HttpStatus.OK);
+    }
+
+    @PostMapping("/add-title/{projectId}")
+    public ResponseEntity<?> addTitleToProject(@RequestBody @Valid TitleRequest titleRequest, @PathVariable Long projectId) {
+        return new ResponseEntity<>(projectService.addTitleToProject(titleRequest,projectId), HttpStatus.CREATED);
     }
 
 }

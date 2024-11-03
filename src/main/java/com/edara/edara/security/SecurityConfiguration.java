@@ -74,6 +74,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-project-tasks/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-user-tasks/{userId}").hasAuthority("USER")
+                        .requestMatchers("/projects/add-title/{projectId}").hasAuthority("USER")
                         .requestMatchers("/tasks/get-by-id/{taskId}").hasAuthority("USER")
                         .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
                         .requestMatchers("/tasks/finish-task/{taskId}").hasAuthority("USER")

@@ -2,10 +2,11 @@ package com.edara.edara.service.impl;
 
 import com.edara.edara.model.dto.TitleRequest;
 import com.edara.edara.model.dto.TitleResponse;
+import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Title;
 import com.edara.edara.model.mapper.TitleMapper;
 import com.edara.edara.repository.TitleRepo;
-import com.edara.edara.service.TitleServcie;
+import com.edara.edara.service.TitleService;
 import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @Service
-public class TitleServiceImpl implements TitleServcie {
+public class TitleServiceImpl implements TitleService {
     private final TitleRepo titleRepo;
     private final TitleMapper titleMapper;
     private final NonNullBeanUtils nonNullBeanUtils;
@@ -40,6 +41,13 @@ public class TitleServiceImpl implements TitleServcie {
     @Override
     public Title save(Title title) {
         return titleRepo.save(title);
+    }
+
+    @Override
+    public Title add(TitleRequest titleRequest, Project project) {
+        Title newTitle = create(titleRequest);
+        newTitle.setProject(project);
+        return save(newTitle);
     }
 
     @Override
@@ -89,4 +97,6 @@ public class TitleServiceImpl implements TitleServcie {
                 .map(this::toResponse)
                 .toList();
     }
+
+
 }
