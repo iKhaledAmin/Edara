@@ -33,4 +33,6 @@ public interface ProjectService extends CrudService<ProjectRequest, Project, Pro
 
 
      TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId);
+     void deleteTitleFromProject(Long titleId);
+     List<TitleResponse> getResponseAllTitlesByProjectId(Long projectId);
 }

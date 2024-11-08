@@ -329,14 +329,36 @@ public class ProjectServiceImpl implements ProjectService {
         return projectTasks.stream().map(taskService::toResponse).toList();
     }
 
+    private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Project project) {
+        boolean hasSameTitleName = project.getTitles().stream()
+                .anyMatch(title -> title.getName().equalsIgnoreCase(titleName));
+
+        if (hasSameTitleName) {
+            throw new RuntimeException("Title with the same name already exists in this project.");
+        }
+    }
 
     @Transactional
     public TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId) {
         Project project = getById(projectId);
+        throwExceptionIfProjectIncludeTitleWithSameName(titleRequest.getName(), project);
         Title title = titleService.add(titleRequest, project);
         project.getTitles().add(title);
 
         return titleService.toResponse(title);
     }
 
+
+    @Override
+    @Transactional
+    public void deleteTitleFromProject(Long titleId) {
+        Title title = titleService.getById(titleId);
+        Project project = getById(title.getProject().getId());
+        project.getTitles().remove(title); // This triggers deletion of task due to orphanRemoval = true
+    }
+
+    public List<TitleResponse> getResponseAllTitlesByProjectId(Long projectId){
+        Project project = getById(projectId);
+        return project.getTitles().stream().map(titleService::toResponse).toList();
+    }
 }

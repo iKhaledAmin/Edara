@@ -54,8 +54,8 @@ public class TitleServiceImpl implements TitleService {
     public Title updateEntity(Long titleId, Title newTitle) {
         Title existedTitle = getById(titleId);
 
-        // Copy properties from newTitle to existedTitle, excluding the "id", "code", "project"
-        nonNullBeanUtils.copyProperties(newTitle, existedTitle, "id","project");
+        // Copy properties from newTitle to existedTitle, excluding the "id", "name", "project"
+        nonNullBeanUtils.copyProperties(newTitle, existedTitle, "id","name","project");
 
         return save(existedTitle);
     }
