@@ -33,6 +33,8 @@ public class MemberShipResponse {
     @Enumerated(EnumType.STRING)
     private ProjectRole projectRole;
 
+    private String title;
+
 
 
 }

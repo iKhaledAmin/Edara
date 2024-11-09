@@ -102,7 +102,7 @@ public class ProjectServiceImpl implements ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getByUserName(authentication.getName());
 
-        MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER);
+        MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER, null);
         newProject.getMemberShips().add(memberShip);
 
         return newProject;
@@ -195,13 +195,14 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private MemberShip addUserToProject(User user, Project project, ProjectRole projectRole) {
+    private MemberShip addUserToProject(User user, Project project, ProjectRole projectRole, Title title) {
         throwExceptionIfUserAlreadyExistsInProject(user, project);
 
         MemberShip newMemberShip = new MemberShip();
         newMemberShip.setProjectRole(projectRole);
         newMemberShip.setProject(project);
         newMemberShip.setUser(user);
+        newMemberShip.setTitle(title);
 
         project.getMemberShips().add(newMemberShip);
         user.getMemberShips().add(newMemberShip);
@@ -212,10 +213,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest) {
 
-        User user = userService.getByUserName(memberShipRequest.getUserName());
+        User user = userService.getById(memberShipRequest.getUserId());
         Project project = getById(memberShipRequest.getProjectId());
+        Title title = titleService.getById(memberShipRequest.getTitleId());
 
-        MemberShip newMemberShip = addUserToProject(user, project, memberShipRequest.getProjectRole());
+        MemberShip newMemberShip = addUserToProject(user, project, memberShipRequest.getProjectRole(), title);
 
         return memberShipService.toResponse(newMemberShip);
     }

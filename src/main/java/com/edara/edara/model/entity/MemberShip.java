@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -47,4 +49,12 @@ public class MemberShip extends BaseEntity{
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
     )
     private List<Task> tasks;
+
+    @ManyToOne( fetch = FetchType.LAZY,
+            optional = true,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    @JoinColumn(name = "title_id", referencedColumnName = "title_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private Title title;
 }
