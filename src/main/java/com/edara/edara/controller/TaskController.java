@@ -15,7 +15,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping("/get-by-id/{taskId}")
-    public ResponseEntity<?> getManagerById(@PathVariable Long taskId) {
+    public ResponseEntity<?> getById(@PathVariable Long taskId) {
         return new ResponseEntity<>(this.taskService.getResponseById(taskId),HttpStatus.OK);
     }
     @PutMapping("/update/{taskId}")

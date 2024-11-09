@@ -86,13 +86,21 @@ public class TaskServiceImpl implements TaskService {
         return taskRepo.findAllTasksByUserId(userId);
     }
 
+    private void throwExceptionIfTaskIsAssignedToEmployee(Task task) {
+        if (task.getMember() != null) {
+            throw new RuntimeException("You cannot modify this task, it is assigned to employee.");
+        }
+    }
+
     @SneakyThrows
     @Override
     public Task updateEntity(Long taskId, Task newTask) {
         Task existedTask = getById(taskId);
 
+        throwExceptionIfTaskIsAssignedToEmployee(existedTask);
+
         // Copy properties from newTask to existedTask, excluding the "id", "code", "project"
-        nonNullBeanUtils.copyProperties(newTask, existedTask, "id", "code",  "project","member");
+        nonNullBeanUtils.copyProperties(newTask, existedTask, "id", "code","name","project","member");
 
         return save(existedTask);
     }

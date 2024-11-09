@@ -1,10 +1,7 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.model.dto.*;
-import com.edara.edara.model.entity.MemberShip;
-import com.edara.edara.model.entity.Project;
-import com.edara.edara.model.entity.Task;
-import com.edara.edara.model.entity.User;
+import com.edara.edara.model.entity.*;
 import com.edara.edara.model.enums.ProjectRole;
 import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.ProjectMapper;
@@ -12,6 +9,7 @@ import com.edara.edara.repository.ProjectRepo;
 import com.edara.edara.service.MemberShipService;
 import com.edara.edara.service.ProjectService;
 import com.edara.edara.service.TaskService;
+import com.edara.edara.service.TitleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
@@ -34,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final TaskService taskService;
     private final MemberShipService memberShipService;
     private final UserServiceImpl userService;
+    private final TitleService titleService;
 
 
 
@@ -103,7 +102,7 @@ public class ProjectServiceImpl implements ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getByUserName(authentication.getName());
 
-        MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER);
+        MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER, null);
         newProject.getMemberShips().add(memberShip);
 
         return newProject;
@@ -196,13 +195,14 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private MemberShip addUserToProject(User user, Project project, ProjectRole projectRole) {
+    private MemberShip addUserToProject(User user, Project project, ProjectRole projectRole, Title title) {
         throwExceptionIfUserAlreadyExistsInProject(user, project);
 
         MemberShip newMemberShip = new MemberShip();
         newMemberShip.setProjectRole(projectRole);
         newMemberShip.setProject(project);
         newMemberShip.setUser(user);
+        newMemberShip.setTitle(title);
 
         project.getMemberShips().add(newMemberShip);
         user.getMemberShips().add(newMemberShip);
@@ -213,10 +213,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest) {
 
-        User user = userService.getByUserName(memberShipRequest.getUserName());
+        User user = userService.getById(memberShipRequest.getUserId());
         Project project = getById(memberShipRequest.getProjectId());
+        Title title = titleService.getById(memberShipRequest.getTitleId());
 
-        MemberShip newMemberShip = addUserToProject(user, project, memberShipRequest.getProjectRole());
+        MemberShip newMemberShip = addUserToProject(user, project, memberShipRequest.getProjectRole(), title);
 
         return memberShipService.toResponse(newMemberShip);
     }
@@ -330,6 +331,36 @@ public class ProjectServiceImpl implements ProjectService {
         return projectTasks.stream().map(taskService::toResponse).toList();
     }
 
+    private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Project project) {
+        boolean hasSameTitleName = project.getTitles().stream()
+                .anyMatch(title -> title.getName().equalsIgnoreCase(titleName));
+
+        if (hasSameTitleName) {
+            throw new RuntimeException("Title with the same name already exists in this project.");
+        }
+    }
+
+    @Transactional
+    public TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId) {
+        Project project = getById(projectId);
+        throwExceptionIfProjectIncludeTitleWithSameName(titleRequest.getName(), project);
+        Title title = titleService.add(titleRequest, project);
+        project.getTitles().add(title);
+
+        return titleService.toResponse(title);
+    }
 
 
+    @Override
+    @Transactional
+    public void deleteTitleFromProject(Long titleId) {
+        Title title = titleService.getById(titleId);
+        Project project = getById(title.getProject().getId());
+        project.getTitles().remove(title); // This triggers deletion of task due to orphanRemoval = true
+    }
+
+    public List<TitleResponse> getResponseAllTitlesByProjectId(Long projectId){
+        Project project = getById(projectId);
+        return project.getTitles().stream().map(titleService::toResponse).toList();
+    }
 }

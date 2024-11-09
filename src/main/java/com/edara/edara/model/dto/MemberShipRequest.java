@@ -4,9 +4,7 @@ import com.edara.edara.model.enums.ProjectRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,14 +18,15 @@ public class MemberShipRequest {
     @NotNull(message = "Project id must not be null")
     private Long projectId;
 
-    @JsonProperty("user_name")
-    @NotNull(message = "User name must not be null")
-    @NotEmpty(message = "User name must not be empty")
-    @Pattern(regexp = "^[a-zA-Z0-9]+@edara\\.com$", message = "User name must follow the format username@edara.com")
-    private String userName;
+    @JsonProperty("user_id")
+    @NotNull(message = "User id must not be null")
+    private Long userId;
 
     @JsonProperty("project_role")
     @NotNull(message = "Project role must not be null")
     @Enumerated(EnumType.STRING)
     private ProjectRole projectRole;
+
+    @JsonProperty("title_id")
+    private Long titleId;
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Service
 public interface ProjectService extends CrudService<ProjectRequest, Project, ProjectResponse,Long> {
-    public ProjectResponse add(ProjectRequest projectRequest);
+     ProjectResponse add(ProjectRequest projectRequest);
 
 
     MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest);
@@ -25,9 +25,14 @@ public interface ProjectService extends CrudService<ProjectRequest, Project, Pro
 
 
     List<Task> getAllTasksByProjectId(Long projectId);
-     List<TaskResponse> getResponseAllTasksByProjectId(Long projectId);
+    List<TaskResponse> getResponseAllTasksByProjectId(Long projectId);
 
 
-    public List<Task> getAllTasksByUserId(Long userId);
-    public List<TaskResponse> getResponseAllTasksByUserId(Long userId);
+     List<Task> getAllTasksByUserId(Long userId);
+     List<TaskResponse> getResponseAllTasksByUserId(Long userId);
+
+
+     TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId);
+     void deleteTitleFromProject(Long titleId);
+     List<TitleResponse> getResponseAllTitlesByProjectId(Long projectId);
 }
