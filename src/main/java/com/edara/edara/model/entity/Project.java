@@ -61,5 +61,9 @@ public class Project extends BaseEntity {
     )
     private List<Title> titles = new ArrayList<>();
 
-
+//    @OneToMany(mappedBy = "project",
+//            fetch = FetchType.LAZY,
+//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+//    )
+//    private List<Attendance> attendances;
 }

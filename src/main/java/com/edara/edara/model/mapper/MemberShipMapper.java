@@ -11,12 +11,26 @@ public interface MemberShipMapper {
 
     MemberShip toEntity(MemberShipRequest request);
 
-    @Mapping(target = "uerName" , source = "entity.user.userName")
-    @Mapping(target = "userId" , source = "entity.user.id")
-    @Mapping(target = "projectName" , source = "entity.project.name")
-    @Mapping(target = "joinDate" , source = "entity.createdAt")
-    @Mapping(target = "title" , source = "entity.title.name")
+    @Mapping(target = "employeeId", source = "entity.user.id")
+    @Mapping(target = "employeeName", expression = "java(concatenateUserName(entity.getUser().getFirstName(), entity.getUser().getLastName()))")
+    @Mapping(target = "employeeImage", source = "entity.user.image")
+    @Mapping(target = "employeeCode", source = "entity.user.personalCode")
+    @Mapping(target = "joinDate", source = "entity.createdAt")
+    @Mapping(target = "title", source = "entity.title.name")
     MemberShipResponse toResponse(MemberShip entity);
+
+    default String concatenateUserName(String firstName, String lastName) {
+        if (firstName == null && lastName == null) {
+            return null;
+        }
+        if (firstName == null) {
+            return lastName;
+        }
+        if (lastName == null) {
+            return firstName;
+        }
+        return firstName + " " + lastName;
+    }
 
 
 }

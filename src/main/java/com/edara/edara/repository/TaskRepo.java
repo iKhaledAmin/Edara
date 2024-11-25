@@ -13,5 +13,12 @@ public interface TaskRepo extends JpaRepository<Task,Long> {
     Long getLastId();
 
     @Query("SELECT t FROM Task t JOIN t.member m WHERE m.user.id = :userId")
-    List<Task> findAllTasksByUserId(Long userId);
+    List<Task> findAllByUserId(Long userId);
+
+    @Query("SELECT t FROM Task t " +
+            "JOIN t.member m " +
+            "JOIN m.user u " +
+            "JOIN t.project p " +
+            "WHERE u.id = :userId AND p.id = :projectId")
+    List<Task> findAllByUserIdAndProjectId(Long userId, Long projectId);
 }

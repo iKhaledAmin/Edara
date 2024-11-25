@@ -16,25 +16,27 @@ import java.util.Date;
 @NoArgsConstructor
 public class MemberShipResponse {
 
-    @JsonProperty("user_id")
-    private Long userId;
+    @JsonProperty("employee_id")
+    private Long employeeId;
 
-    @JsonProperty("user_name")
-    private String uerName;
+    @JsonProperty("employee_name")
+    private String employeeName;
 
-    @JsonProperty("project_name")
-    private String projectName;
+    @JsonProperty("employee_image")
+    private String employeeImage;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
-    @JsonProperty("join_date")
-    private Date joinDate;
+    @JsonProperty("employee_code")
+    private String employeeCode;
 
     @JsonProperty("project_role")
     @Enumerated(EnumType.STRING)
     private ProjectRole projectRole;
 
+    @JsonProperty("title")
     private String title;
 
-
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonProperty("join_date")
+    private Date joinDate;
 
 }

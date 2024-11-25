@@ -36,23 +36,23 @@ public class ProjectController {
     @DeleteMapping("/delete/{projectId}")
     public ResponseEntity<?> deleteById(@PathVariable Long projectId) {
         projectService.delete(projectId);
-        return new ResponseEntity<>("Deleted Successfully", HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/add-user")
-    public ResponseEntity<?> addUserToProject(@RequestBody @Valid MemberShipRequest memberShipRequest) {
-        return new ResponseEntity<>(projectService.addUserToProject(memberShipRequest), HttpStatus.CREATED);
+    @PostMapping("/add-employee")
+    public ResponseEntity<?> addEmployeeToProject(@RequestBody @Valid MemberShipRequest memberShipRequest) {
+        return new ResponseEntity<>(projectService.addEmployeeToProject(memberShipRequest), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/delete-user/{userId}/{projectId}")
-    public ResponseEntity<?> deleteUserFromProject(@PathVariable Long userId, @PathVariable Long projectId) {
-        projectService.deleteUserFromProject(userId, projectId);
-        return new ResponseEntity<>("Deleted Successfully", HttpStatus.ACCEPTED);
+    @DeleteMapping("/delete-employee/{employeeId}/{projectId}")
+    public ResponseEntity<?> deleteEmployeeFromProject(@PathVariable Long employeeId, @PathVariable Long projectId) {
+        projectService.deleteEmployeeFromProject(employeeId, projectId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/get-all-users/{projectId}")
-    ResponseEntity<?> getAllUsersByProjectId( @PathVariable Long projectId){
-        return new ResponseEntity<>(this.projectService.getResponseAllUsersByProjectId(projectId), HttpStatus.OK);
+    @GetMapping("/get-all-employees/{projectId}")
+    ResponseEntity<?> getAllEmployeesByProjectId( @PathVariable Long projectId){
+        return new ResponseEntity<>(this.projectService.getResponseAllEmployeesByProjectId(projectId), HttpStatus.OK);
     }
 
 

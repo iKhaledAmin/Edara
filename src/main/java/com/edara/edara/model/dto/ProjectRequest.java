@@ -18,7 +18,6 @@ public class ProjectRequest {
     @NotNull(message = "Name must not be null")
     @NotEmpty(message = "Name must not be empty")
     @NotBlank(message = "Name must not be empty")
-    //@Pattern(regexp = "^[a-zA-Z]+$", message = "Project name must contain only letters")
     @Size(min = 3, max = 50, message = "Project name must be between 3 and 50 characters")
     private String name;
 

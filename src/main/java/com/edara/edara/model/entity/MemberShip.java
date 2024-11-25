@@ -57,4 +57,10 @@ public class MemberShip extends BaseEntity{
     @JoinColumn(name = "title_id", referencedColumnName = "title_id", nullable = true)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Title title;
+
+//    @OneToMany(mappedBy = "member",
+//            fetch = FetchType.LAZY,
+//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+//    )
+//    private List<Attendance> attendances;
 }

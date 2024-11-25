@@ -4,7 +4,9 @@ import com.edara.edara.model.entity.MemberShip;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface MemberShipRepo extends JpaRepository<MemberShip, Long> {
-    MemberShip findByUserIdAndProjectId(Long userId, Long projectId);
+    Optional<MemberShip> findByUserIdAndProjectId(Long userId, Long projectId);
 }

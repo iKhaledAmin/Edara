@@ -3,18 +3,18 @@ package com.edara.edara.service;
 import com.edara.edara.model.dto.MemberShipRequest;
 import com.edara.edara.model.dto.MemberShipResponse;
 import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Title;
+import com.edara.edara.model.entity.User;
+import com.edara.edara.model.enums.ProjectRole;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public interface MemberShipService extends CrudService<MemberShipRequest, MemberShip, MemberShipResponse, Long> {
 
-//     MemberShip toEntity(MemberShipRequest request);
-//
-//     MemberShipResponse toResponse(MemberShip entity);
-//
-//     MemberShip create(MemberShipRequest memberShipRequest);
-//
-//     MemberShip save(MemberShip memberShip);
-
-    MemberShip getByUserIdAndProjectId(Long userId, Long projectId);
+    MemberShip add(User user, Project project, ProjectRole projectRole, Title title);
+   //  void delete(User user, Project project);
+    Optional<MemberShip> getByUserIdAndProjectId(Long userId, Long projectId);
 }

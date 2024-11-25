@@ -40,14 +40,17 @@ public class SecurityConfiguration {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Collections.singletonList("https://localhost:4200"));
+                        // Add Swagger Editor Origin
+                        config.setAllowedOrigins(Collections.singletonList("https://editor-next.swagger.io"));
+                        // You can allow other origins as needed
+                        // config.setAllowedOrigins(Arrays.asList("https://editor-next.swagger.io", "http://localhost:4200"));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
                         config.setExposedHeaders(Arrays.asList("Authorization"));
-                        config.setMaxAge(3600L);
+                        config.setMaxAge(3600L);  // Cache CORS pre-flight response
                         return config;
-                    }
+}
                 }))
                 .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .ignoringRequestMatchers( "/users/register","/auth/login")
@@ -66,9 +69,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/get-by-id/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/add-user").hasAuthority("USER")
-                        .requestMatchers("/projects/delete-user/{userId}/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-users/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/add-employee").hasAuthority("USER")
+                        .requestMatchers("/projects/delete-employee/{employeeId}/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/get-all-employees/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/add-task/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete-task/{taskId}").hasAuthority("USER")
                         .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")

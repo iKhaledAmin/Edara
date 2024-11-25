@@ -22,11 +22,12 @@ public class MemberShipRequest {
     @NotNull(message = "User id must not be null")
     private Long userId;
 
+    @JsonProperty("title_id")
+    private Long titleId;
+
     @JsonProperty("project_role")
     @NotNull(message = "Project role must not be null")
     @Enumerated(EnumType.STRING)
     private ProjectRole projectRole;
 
-    @JsonProperty("title_id")
-    private Long titleId;
 }

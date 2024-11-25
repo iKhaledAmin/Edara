@@ -31,7 +31,7 @@ public class ProjectResponse {
     @JsonProperty("image")
     private String image;
 
-    @JsonProperty("created_at")
+    @JsonProperty("started_at")
     @JsonFormat(pattern="yyyy-MM-dd")
-    private Date createdAt;
+    private Date startedAt;
 }

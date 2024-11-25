@@ -1,5 +1,6 @@
 package com.edara.edara.service.impl;
 
+import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.*;
 import com.edara.edara.model.entity.*;
 import com.edara.edara.model.enums.ProjectRole;
@@ -10,8 +11,8 @@ import com.edara.edara.service.MemberShipService;
 import com.edara.edara.service.ProjectService;
 import com.edara.edara.service.TaskService;
 import com.edara.edara.service.TitleService;
+import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final MemberShipService memberShipService;
     private final UserServiceImpl userService;
     private final TitleService titleService;
+    private final NonNullBeanUtils nonNullBeanUtils;
+
 
 
 
@@ -62,6 +65,16 @@ public class ProjectServiceImpl implements ProjectService {
         return sequenceNumber;
     }
 
+    @Override
+    public ProjectResponse toResponse(Project project) {
+        return projectMapper.toResponse(project);
+    }
+
+    @Override
+    public Project toEntity(ProjectRequest projectRequest) {
+        return projectMapper.toEntity(projectRequest);
+    }
+
     private void throwExceptionIfUserHasProjectWithSameName(String projectName) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -76,19 +89,8 @@ public class ProjectServiceImpl implements ProjectService {
 
         // Throw an exception if the user is the OWNER of a project with the same name
         if (isOwnerOfSameNameProject) {
-            throw new IllegalStateException("You already own a project with the same name.");
+            throw new ConflictException("You already own a project with the same name.");
         }
-    }
-
-
-    @Override
-    public ProjectResponse toResponse(Project project) {
-        return projectMapper.toResponse(project);
-    }
-
-    @Override
-    public Project toEntity(ProjectRequest projectRequest) {
-        return projectMapper.toEntity(projectRequest);
     }
 
     @Override
@@ -102,7 +104,8 @@ public class ProjectServiceImpl implements ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getByUserName(authentication.getName());
 
-        MemberShip memberShip = addUserToProject (user, newProject, ProjectRole.OWNER, null);
+        MemberShip memberShip = addEmployeeToProject(user, newProject, ProjectRole.OWNER, null);
+
         newProject.getMemberShips().add(memberShip);
 
         return newProject;
@@ -123,12 +126,13 @@ public class ProjectServiceImpl implements ProjectService {
     public Project updateEntity(Long projectId, Project newProject) {
         Project existedProject = getById(projectId);
 
+        // If the new project name is different, ensure no other project exists with the same new name.
         if (!existedProject.getName().equalsIgnoreCase(newProject.getName())) {
-            throwExceptionIfProjectStillHasEmployees(existedProject);
+            throwExceptionIfUserHasProjectWithSameName(newProject.getName());
         }
 
         // Copy properties from newProject to existedProject, excluding the "id", "code", "createdAt", "type"
-        BeanUtils.copyProperties(newProject, existedProject, "id", "code", "createdAt", "type","memberShips", "tasks");
+        nonNullBeanUtils.copyProperties(newProject, existedProject, "id", "code", "createdAt", "type","memberShips", "tasks", "titles");
 
         // Save the updated user
         existedProject = projectRepo.save(existedProject);
@@ -152,7 +156,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .anyMatch(memberShip -> !memberShip.getProjectRole().equals(ProjectRole.OWNER));
 
         if (hasEmployees) {
-            throw new RuntimeException("Cannot delete the project.still has employees associated with this project.");
+            throw new ConflictException("Cannot delete the project.still has employees associated with this project.");
         }
     }
     @Override
@@ -187,57 +191,62 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
-    private void throwExceptionIfUserAlreadyExistsInProject(User user, Project project) {
+    private void throwExceptionIfEmployeeAlreadyExistsInProject(User user, Project project) {
 
         if (project.getMemberShips().stream()
                 .anyMatch(memberShip -> memberShip.getUser().equals(user))) {
-            throw new RuntimeException("User already exists in the project.");
+            throw new ConflictException("Employee already exists in the project.");
         }
     }
 
-    private MemberShip addUserToProject(User user, Project project, ProjectRole projectRole, Title title) {
-        throwExceptionIfUserAlreadyExistsInProject(user, project);
-
-        MemberShip newMemberShip = new MemberShip();
-        newMemberShip.setProjectRole(projectRole);
-        newMemberShip.setProject(project);
-        newMemberShip.setUser(user);
-        newMemberShip.setTitle(title);
-
-        project.getMemberShips().add(newMemberShip);
-        user.getMemberShips().add(newMemberShip);
-
-        return memberShipService.save(newMemberShip);
+    private MemberShip addEmployeeToProject(User user, Project project, ProjectRole projectRole, Title title) {
+        throwExceptionIfEmployeeAlreadyExistsInProject(user, project);
+        return memberShipService.add(user, project, projectRole, title);
     }
 
-    @Override
-    public MemberShipResponse addUserToProject(MemberShipRequest memberShipRequest) {
 
-        User user = userService.getById(memberShipRequest.getUserId());
+    @Override
+    public MemberShipResponse addEmployeeToProject(MemberShipRequest memberShipRequest) {
+
         Project project = getById(memberShipRequest.getProjectId());
-        Title title = titleService.getById(memberShipRequest.getTitleId());
+        User user = userService.getById(memberShipRequest.getUserId());
+        Title title = null;
 
-        MemberShip newMemberShip = addUserToProject(user, project, memberShipRequest.getProjectRole(), title);
+        if (memberShipRequest.getTitleId() != null){
+             title = titleService.getById(memberShipRequest.getTitleId());
+        }
+        MemberShip newMember = addEmployeeToProject(user, project, memberShipRequest.getProjectRole(), title);
 
-        return memberShipService.toResponse(newMemberShip);
+        return memberShipService.toResponse(newMember);
     }
-    @Override
-    public void deleteUserFromProject(Long userId, Long projectId) {
 
-        User user = userService.getById(userId);
+    private void throwExceptionIfEmployeeStillWorkingOnTask(MemberShip memberShip) {
+        if (memberShip.getTasks().stream()
+                .anyMatch(task -> task.getStatus().equals(TaskStatus.ON_WORKING))) {
+            throw new ConflictException("Employee is still working on a task.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public void deleteEmployeeFromProject(Long employeeId, Long projectId) {
+        User user = userService.getById(employeeId);
         Project project = getById(projectId);
 
-        MemberShip membershipToRemove = memberShipService.getByUserIdAndProjectId(user.getId(), project.getId());
+        MemberShip memberShip = memberShipService.getByUserIdAndProjectId(employeeId, projectId).orElseThrow(
+                () -> new ConflictException("Employee with id = " + employeeId + " not involved in this project.")
+        );
+        throwExceptionIfEmployeeStillWorkingOnTask(memberShip);
 
-        // Remove the membership from the project and the user
-        project.getMemberShips().remove(membershipToRemove);
-        user.getMemberShips().remove(membershipToRemove);
+        user.getMemberShips().remove(memberShip);
+        project.getMemberShips().remove(memberShip);
 
-        memberShipService.delete(membershipToRemove.getId());
+        //memberShipService.deleteById(membershipId); //no need for this because orphanRemoval = true in the relation
+                                                      // MemberShip and (Project and User) .
     }
 
     @Override
-    public List<MemberShipResponse> getResponseAllUsersByProjectId(Long projectId) {
+    public List<MemberShipResponse> getResponseAllEmployeesByProjectId(Long projectId) {
         Project project = getById(projectId);
         return project.getMemberShips().stream()
                 .map(memberShipService::toResponse)
@@ -274,7 +283,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void throwExceptionIfTaskOnWorking(Task task) {
 
-        if (task.getStatus().equals(TaskStatus.IN_PROGRESS)) {
+        if (task.getStatus().equals(TaskStatus.ON_WORKING)) {
             throw new RuntimeException("Task is already in on working.");
         }
     }
@@ -299,7 +308,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         throwExceptionIfTaskAlreadyAssignedToEmployee(task);
         task.setMember(member);
-        task.setStatus(TaskStatus.IN_PROGRESS);
+        task.setStatus(TaskStatus.ON_WORKING);
 
         member.getTasks().add(task);
 
@@ -307,7 +316,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
     public TaskResponse assignTaskToMember(Long taskId, Long userId) {
         Task task = taskService.getById(taskId);
-        MemberShip member = memberShipService.getByUserIdAndProjectId(userId, task.getProject().getId());
+        User user = userService.getById(userId);
+
+        MemberShip member = memberShipService.getByUserIdAndProjectId(userId, task.getProject().getId()).orElseThrow(
+                () -> new RuntimeException("User with id = " + userId + " not involved in this project.")
+        );
+
         Task aasignedTask = assignTaskToMember(task, member);
 
         return taskService.toResponse(aasignedTask);
@@ -324,7 +338,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     public List<Task> getAllTasksByUserId(Long userId) {
-        return taskService.getAllTasksByUserId(userId);
+        return taskService.getAllByUserId(userId);
     }
     public List<TaskResponse> getResponseAllTasksByUserId(Long userId) {
         List<Task> projectTasks = getAllTasksByUserId(userId);

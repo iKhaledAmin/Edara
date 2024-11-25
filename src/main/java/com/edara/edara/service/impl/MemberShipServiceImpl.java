@@ -3,11 +3,16 @@ package com.edara.edara.service.impl;
 import com.edara.edara.model.dto.MemberShipRequest;
 import com.edara.edara.model.dto.MemberShipResponse;
 import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Title;
+import com.edara.edara.model.entity.User;
+import com.edara.edara.model.enums.ProjectRole;
 import com.edara.edara.model.mapper.MemberShipMapper;
 import com.edara.edara.repository.MemberShipRepo;
 import com.edara.edara.service.MemberShipService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,16 +37,30 @@ public class MemberShipServiceImpl implements MemberShipService {
         MemberShip memberShip = toEntity(memberShipRequest);
         return memberShip;
     }
-
     public MemberShip save(MemberShip memberShip) {
         return memberShipRepo.save(memberShip);
     }
 
-    @Override
-    public MemberShip getByUserIdAndProjectId(Long userId, Long projectId) {
-        return memberShipRepo.findByUserIdAndProjectId(userId, projectId);
+    public MemberShip add(User user, Project project, ProjectRole projectRole, Title title) {
+
+        MemberShip newMemberShip = new MemberShip();
+
+        newMemberShip.setUser(user);
+        newMemberShip.setProject(project);
+        newMemberShip.setProjectRole(projectRole);
+        newMemberShip.setTitle(title);
+
+        project.getMemberShips().add(newMemberShip);
+        System.out.println("Here 1");
+
+
+        return save(newMemberShip);
     }
 
+    @Override
+    public Optional<MemberShip> getByUserIdAndProjectId(Long userId, Long projectId) {
+        return memberShipRepo.findByUserIdAndProjectId(userId, projectId);
+    }
 
 
     @Override
@@ -54,10 +73,16 @@ public class MemberShipServiceImpl implements MemberShipService {
         return null;
     }
 
+    @Transactional
     @Override
     public void delete(Long membershipId) {
-        getById(membershipId);
-        memberShipRepo.deleteById(membershipId);
+        MemberShip memberShip = getById(membershipId);
+
+        memberShip.getProject().getMemberShips().remove(memberShip);
+        memberShip.getUser().getMemberShips().remove(memberShip);
+
+        //memberShipRepo.deleteById(membershipId); // no need for this because orphanRemoval = true in the relation
+                                                   // MemberShip and (Project and User) .
     }
 
     @Override

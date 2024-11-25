@@ -10,7 +10,9 @@ import java.util.List;
 @Service
 public interface TaskService extends CrudService<TaskRequest, Task, TaskResponse,Long> {
      TaskResponse add(TaskRequest taskRequest);
-     List<Task> getAllTasksByUserId(Long userId);
-      TaskResponse finishTask(Long taskId);
+     List<Task> getAllByUserId(Long userId);
+     List<Task> getAllByUserIdAndProjectId(Long userId, Long projectId);
+
+    TaskResponse finishTask(Long taskId);
 
 }

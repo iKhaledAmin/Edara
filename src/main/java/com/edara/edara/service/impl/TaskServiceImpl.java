@@ -67,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
     public Task create(TaskRequest taskRequest){
         Task newTask = taskMapper.toEntity(taskRequest);
         newTask.setCode(generateUniqueTaskCode());
-        newTask.setStatus(TaskStatus.PENDING);
+        newTask.setStatus(TaskStatus.WAITING);
         return newTask;
     }
 
@@ -82,9 +82,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getAllTasksByUserId(Long userId) {
-        return taskRepo.findAllTasksByUserId(userId);
+    public List<Task> getAllByUserId(Long userId) {
+        return taskRepo.findAllByUserId(userId);
     }
+    @Override
+    public List<Task> getAllByUserIdAndProjectId(Long userId, Long projectId) {
+        return taskRepo.findAllByUserIdAndProjectId(userId, projectId);
+    }
+
 
     private void throwExceptionIfTaskIsAssignedToEmployee(Task task) {
         if (task.getMember() != null) {
@@ -151,6 +156,6 @@ public class TaskServiceImpl implements TaskService {
         return save(task);
     }
     public TaskResponse finishTask(Long taskId) {
-        return toResponse(changeStatus(taskId, TaskStatus.COMPLETED));
+        return toResponse(changeStatus(taskId, TaskStatus.FINISHED));
     }
 }
