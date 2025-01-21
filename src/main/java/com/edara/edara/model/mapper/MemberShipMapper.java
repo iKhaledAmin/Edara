@@ -14,7 +14,7 @@ public interface MemberShipMapper {
     @Mapping(target = "employeeId", source = "entity.user.id")
     @Mapping(target = "employeeName", expression = "java(concatenateUserName(entity.getUser().getFirstName(), entity.getUser().getLastName()))")
     @Mapping(target = "employeeImage", source = "entity.user.image")
-    @Mapping(target = "employeeCode", source = "entity.user.personalCode")
+    @Mapping(target = "employeeCode", source = "entity.user.userCode")
     @Mapping(target = "joinDate", source = "entity.createdAt")
     @Mapping(target = "title", source = "entity.title.name")
     MemberShipResponse toResponse(MemberShip entity);

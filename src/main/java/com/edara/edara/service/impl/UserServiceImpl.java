@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService  {
         }
     }
 
-    private String generateUniquePersonalCode(String firstName, String lastName) {
+    private String generateUniqueCode(String firstName, String lastName) {
         String prefix = firstName.substring(0, 1).toLowerCase() + lastName.substring(0, 1).toLowerCase();
         Long nextId = getNextId();
         String sequenceNumber = hashIdToSixDigit(nextId.toString());
@@ -82,8 +82,8 @@ public class UserServiceImpl implements UserService  {
         User newUser = userMapper.toEntity(userRequest);
         newUser.setRole(Role.USER);
         newUser.setDateOfJoining(new Date());
-        newUser.setPersonalCode(
-                generateUniquePersonalCode(newUser.getFirstName(),newUser.getLastName())
+        newUser.setUserCode(
+                generateUniqueCode(newUser.getFirstName(),newUser.getLastName())
         );
 
         String hashedPassword = passwordEncoder.encode(newUser.getPassword());
@@ -112,8 +112,8 @@ public class UserServiceImpl implements UserService  {
     public User updateEntity(Long userId, User newUser) {
         User existedUser = getById(userId);
 
-        // Copy properties from newUser to existedUser, excluding the "id", "personalCode", "dateOfJoining", "role"
-        BeanUtils.copyProperties(newUser, existedUser, "id", "personalCode", "dateOfJoining", "role");
+        // Copy properties from newUser to existedUser, excluding the "id", "userCode", "dateOfJoining", "role"
+        BeanUtils.copyProperties(newUser, existedUser, "id", "userCode", "dateOfJoining", "role");
 
         // Save the updated user
         existedUser = userRepo.save(existedUser);
@@ -148,6 +148,18 @@ public class UserServiceImpl implements UserService  {
     public User getByUserName(String userName) {
         return getEntityByUserName(userName).orElseThrow(
                 () -> new NoSuchElementException("There is no user with userName = " + userName)
+        );
+    }
+
+    @Override
+    public Optional<User> getEntityByCode(String userCode) {
+        return userRepo.findByUserCode(userCode);
+    }
+
+    @Override
+    public User getByCode(String userCode) {
+        return getEntityByCode(userCode).orElseThrow(
+                () -> new NoSuchElementException("There is no user with userCode = " + userCode)
         );
     }
 

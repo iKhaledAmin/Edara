@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,7 +22,7 @@ public class MemberShip extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "membership_id")
+    @Column(name = "member_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -48,7 +49,7 @@ public class MemberShip extends BaseEntity{
             fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
     )
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @ManyToOne( fetch = FetchType.LAZY,
             optional = true,
@@ -58,9 +59,15 @@ public class MemberShip extends BaseEntity{
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Title title;
 
-//    @OneToMany(mappedBy = "member",
-//            fetch = FetchType.LAZY,
-//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
-//    )
-//    private List<Attendance> attendances;
+    @OneToMany(mappedBy = "member",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the MemberShip is deleted.
+    )
+    private List<CurrentAttendance> currentAttendances = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL //Deletes all dailyAttendances entities when the MemberShip is deleted.
+    )
+    private List<DailyAttendance> dailyAttendances  = new ArrayList<>();
 }

@@ -16,5 +16,10 @@ public interface MemberShipService extends CrudService<MemberShipRequest, Member
 
     MemberShip add(User user, Project project, ProjectRole projectRole, Title title);
    //  void delete(User user, Project project);
-    Optional<MemberShip> getByUserIdAndProjectId(Long userId, Long projectId);
+    Optional<MemberShip> getEntityByUserIdAndProjectId(Long userId, Long projectId);
+    MemberShip getByUserIdAndProjectId(Long userId, Long projectId);
+
+    Optional<MemberShip> getEntityByUserCodeAndProjectId(String userCode, Long projectId);
+    MemberShip getByUserCodeAndProjectId(String userCode, Long projectId);
+
 }

@@ -18,8 +18,8 @@ public class UserResponse extends PersonResponse{
     @JsonProperty("profession")
     private String profession;
 
-    @JsonProperty("personal_code")
-    private String personalCode;
+    @JsonProperty("used_code")
+    private String userCode;
 
     @JsonProperty("number_of_projects")
     private Long NumberOfProjects;

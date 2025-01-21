@@ -15,6 +15,8 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberShipResponse {
+    @JsonProperty("id")
+    private Long id;
 
     @JsonProperty("employee_id")
     private Long employeeId;
@@ -27,6 +29,9 @@ public class MemberShipResponse {
 
     @JsonProperty("employee_code")
     private String employeeCode;
+
+    @JsonProperty("project_name")
+    private String projectName;
 
     @JsonProperty("project_role")
     @Enumerated(EnumType.STRING)

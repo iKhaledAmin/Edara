@@ -16,4 +16,6 @@ public interface UserService extends CrudService<UserRequest, User, UserResponse
     User getByUserName(String account);
 
 
+    Optional<User> getEntityByCode(String userCode);
+    User getByCode(String userCode);
 }

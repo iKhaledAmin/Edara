@@ -23,7 +23,7 @@ public class User extends Person{
 
 
     private String profession;
-    private String personalCode;
+    private String userCode;
     private Long NumberOfProjects;
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date dateOfJoining;
