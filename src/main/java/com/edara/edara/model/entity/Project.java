@@ -2,6 +2,7 @@ package com.edara.edara.model.entity;
 
 import com.edara.edara.model.enums.ProjectType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ public class Project extends BaseEntity {
     @Column(name = "project_id")
     private Long id;
 
+    @NotNull
     private String name;
 
     @Lob
@@ -37,6 +39,8 @@ public class Project extends BaseEntity {
     @Column(columnDefinition = "LONGBLOB")
     private String image;
 
+    @Column(name = "aggregation_hour")
+    private Integer aggregationHour = 12;
 
     @OneToMany(mappedBy = "project",
             fetch = FetchType.LAZY,
@@ -61,9 +65,15 @@ public class Project extends BaseEntity {
     )
     private List<Title> titles = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "project",
-//            fetch = FetchType.LAZY,
-//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
-//    )
-//    private List<Attendance> attendances;
+    @OneToMany(mappedBy = "project",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the Project is deleted.
+    )
+    private List<CurrentAttendance> currentAttendances = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the Project is deleted.
+    )
+    private List<DailyAttendance> dailyAttendances  = new ArrayList<>();
 }

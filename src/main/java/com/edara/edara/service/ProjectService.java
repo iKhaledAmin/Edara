@@ -1,12 +1,13 @@
 package com.edara.edara.service;
 
 
-
 import com.edara.edara.model.dto.*;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Task;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,12 +17,21 @@ public interface ProjectService extends CrudService<ProjectRequest, Project, Pro
 
     MemberShipResponse addEmployeeToProject(MemberShipRequest memberShipRequest);
     void deleteEmployeeFromProject(Long userId, Long projectId);
-     List<MemberShipResponse> getResponseAllEmployeesByProjectId(Long projectId);
+    List<MemberShipResponse> getResponseAllEmployeesByProjectId(Long projectId);
 
 
-     TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId);
-     void deleteTaskFromProject(Long taskId);
-     TaskResponse assignTaskToMember(Long taskId, Long userId);
+    CurrentAttendanceResponse recordMemberAttendance(String employeeCode, Long projectId);
+    CurrentAttendanceResponse endMemberAttendance(String employeeCode, Long projectId);
+    List<DailyAttendanceResponse> getAllDailyAttendancesByProjectIdAndUserCode(Long projectId, String userCode, Integer year, Integer month);
+    List<DailyAttendanceResponse> getAllDailyAttendancesByProjectId(Long projectId, LocalDateTime date);
+    List<DailyAttendanceResponse> getAllCurrentAttendancesByProjectId(Long projectId);
+
+    List<DailyAttendanceResponse> getAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode);
+    List<DailyAttendanceResponse> getAllAbsencesByProjectId(Long projectId, LocalDate date);
+
+    TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId);
+    void deleteTaskFromProject(Long taskId);
+    TaskResponse assignTaskToMember(Long taskId, Long userId);
 
 
     List<Task> getAllTasksByProjectId(Long projectId);

@@ -14,4 +14,5 @@ public interface UserRepo extends JpaRepository<User,Long> {
     Long getLastId();
     Optional<User> findByUserName(String userName);
 
+    Optional<User> findByUserCode(String userCode);
 }

@@ -1,5 +1,6 @@
 package com.edara.edara.service.impl;
 
+import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.MemberShipRequest;
 import com.edara.edara.model.dto.MemberShipResponse;
 import com.edara.edara.model.entity.MemberShip;
@@ -51,15 +52,31 @@ public class MemberShipServiceImpl implements MemberShipService {
         newMemberShip.setTitle(title);
 
         project.getMemberShips().add(newMemberShip);
-        System.out.println("Here 1");
-
 
         return save(newMemberShip);
     }
 
     @Override
-    public Optional<MemberShip> getByUserIdAndProjectId(Long userId, Long projectId) {
+    public Optional<MemberShip> getEntityByUserIdAndProjectId(Long userId, Long projectId) {
         return memberShipRepo.findByUserIdAndProjectId(userId, projectId);
+    }
+
+    @Override
+    public MemberShip getByUserIdAndProjectId(Long userId, Long projectId) {
+        return getEntityByUserIdAndProjectId(userId, projectId).orElseThrow(
+                () -> new ConflictException("User with id = " + userId + " not involved in this project.")
+        );
+    }
+
+    public Optional<MemberShip> getEntityByUserCodeAndProjectId(String userCode, Long projectId) {
+        return memberShipRepo.findByUser_UserCodeAndProject_Id(userCode, projectId);
+    }
+
+    @Override
+    public MemberShip getByUserCodeAndProjectId(String userCode, Long projectId) {
+        return getEntityByUserCodeAndProjectId(userCode, projectId).orElseThrow(
+                () -> new ConflictException("User with code = " + userCode + " not involved in this project.")
+        );
     }
 
 
