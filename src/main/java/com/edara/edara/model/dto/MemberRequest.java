@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberShipRequest {
+public class MemberRequest {
 
     @JsonProperty("project_id")
     @NotNull(message = "Project id must not be null")

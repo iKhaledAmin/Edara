@@ -41,8 +41,8 @@ public class ProjectController {
     }
 
     @PostMapping("/add-employee")
-    public ResponseEntity<?> addEmployeeToProject(@RequestBody @Valid MemberShipRequest memberShipRequest) {
-        return new ResponseEntity<>(projectService.addEmployeeToProject(memberShipRequest), HttpStatus.CREATED);
+    public ResponseEntity<?> addEmployeeToProject(@RequestBody @Valid MemberRequest memberRequest) {
+        return new ResponseEntity<>(projectService.addEmployeeToProject(memberRequest), HttpStatus.CREATED);
     }
     @DeleteMapping("/delete-employee/{employeeId}/{projectId}")
     public ResponseEntity<?> deleteEmployeeFromProject(@PathVariable Long employeeId, @PathVariable Long projectId) {

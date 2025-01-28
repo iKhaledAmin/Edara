@@ -42,7 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Transactional
-    public void aggregateDailyAttendance(MemberShip member, Project project) {
+    public void aggregateDailyAttendance(Member member, Project project) {
         dailyAttendanceService.aggregateDailyMemberAttendancesOfProject(member, project);
     }
 
@@ -55,7 +55,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (!projects.isEmpty()) {
             projects.forEach(project -> {
                 // Fetch all members of the project
-                List<MemberShip> members = project.getMemberShips();
+                List<Member> members = project.getMembers();
                 if (!members.isEmpty()) {
                     // Perform aggregation
                     members.forEach(member -> {
@@ -112,7 +112,7 @@ public class ProjectServiceImpl implements ProjectService {
         User user = userService.getByUserName(authentication.getName());
 
         // Check if the user is the OWNER of a project with the same name
-        boolean isOwnerOfSameNameProject = user.getMemberShips().stream()
+        boolean isOwnerOfSameNameProject = user.getMembers().stream()
                 .anyMatch(memberShip ->
                         memberShip.getProject().getName().equalsIgnoreCase(projectName) &&
                                 memberShip.getProjectRole().equals(ProjectRole.OWNER)
@@ -135,9 +135,9 @@ public class ProjectServiceImpl implements ProjectService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getByUserName(authentication.getName());
 
-        MemberShip memberShip = addEmployeeToProject(user, newProject, ProjectRole.OWNER, null);
+        Member member = addEmployeeToProject(user, newProject, ProjectRole.OWNER, null);
 
-        newProject.getMemberShips().add(memberShip);
+        newProject.getMembers().add(member);
 
         return newProject;
     }
@@ -183,7 +183,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void throwExceptionIfProjectStillHasEmployees(Project project) {
         // Check if the project still has users except the OWNER
-        boolean hasEmployees = project.getMemberShips().stream()
+        boolean hasEmployees = project.getMembers().stream()
                 .anyMatch(memberShip -> !memberShip.getProjectRole().equals(ProjectRole.OWNER));
 
         if (hasEmployees) {
@@ -224,35 +224,35 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void throwExceptionIfEmployeeAlreadyExistsInProject(User user, Project project) {
 
-        if (project.getMemberShips().stream()
+        if (project.getMembers().stream()
                 .anyMatch(memberShip -> memberShip.getUser().equals(user))) {
             throw new ConflictException("Employee already exists in the project.");
         }
     }
 
-    private MemberShip addEmployeeToProject(User user, Project project, ProjectRole projectRole, Title title) {
+    private Member addEmployeeToProject(User user, Project project, ProjectRole projectRole, Title title) {
         throwExceptionIfEmployeeAlreadyExistsInProject(user, project);
         return memberShipService.add(user, project, projectRole, title);
     }
 
 
     @Override
-    public MemberShipResponse addEmployeeToProject(MemberShipRequest memberShipRequest) {
+    public MemberResponse addEmployeeToProject(MemberRequest memberRequest) {
 
-        Project project = getById(memberShipRequest.getProjectId());
-        User user = userService.getById(memberShipRequest.getUserId());
+        Project project = getById(memberRequest.getProjectId());
+        User user = userService.getById(memberRequest.getUserId());
         Title title = null;
 
-        if (memberShipRequest.getTitleId() != null){
-             title = titleService.getById(memberShipRequest.getTitleId());
+        if (memberRequest.getTitleId() != null){
+             title = titleService.getById(memberRequest.getTitleId());
         }
-        MemberShip newMember = addEmployeeToProject(user, project, memberShipRequest.getProjectRole(), title);
+        Member newMember = addEmployeeToProject(user, project, memberRequest.getProjectRole(), title);
 
         return memberShipService.toResponse(newMember);
     }
 
-    private void throwExceptionIfEmployeeStillWorkingOnTask(MemberShip memberShip) {
-        if (memberShip.getTasks().stream()
+    private void throwExceptionIfEmployeeStillWorkingOnTask(Member member) {
+        if (member.getTasks().stream()
                 .anyMatch(task -> task.getStatus().equals(TaskStatus.ON_WORKING))) {
             throw new ConflictException("Employee is still working on a task.");
         }
@@ -264,20 +264,20 @@ public class ProjectServiceImpl implements ProjectService {
         User user = userService.getById(employeeId);
         Project project = getById(projectId);
 
-        MemberShip memberShip = memberShipService.getByUserIdAndProjectId(employeeId, projectId);
-        throwExceptionIfEmployeeStillWorkingOnTask(memberShip);
+        Member member = memberShipService.getByUserIdAndProjectId(employeeId, projectId);
+        throwExceptionIfEmployeeStillWorkingOnTask(member);
 
-        user.getMemberShips().remove(memberShip);
-        project.getMemberShips().remove(memberShip);
+        user.getMembers().remove(member);
+        project.getMembers().remove(member);
 
         //memberShipService.deleteById(membershipId); //no need for this because orphanRemoval = true in the relation
-                                                      // MemberShip and (Project and User) .
+                                                      // Member and (Project and User) .
     }
 
     @Override
-    public List<MemberShipResponse> getResponseAllEmployeesByProjectId(Long projectId) {
+    public List<MemberResponse> getResponseAllEmployeesByProjectId(Long projectId) {
         Project project = getById(projectId);
-        return project.getMemberShips().stream()
+        return project.getMembers().stream()
                 .map(memberShipService::toResponse)
                 .toList();
     }
@@ -292,7 +292,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project project = getById(projectId);
         User user = userService.getByCode(userCode);
-        Optional<MemberShip> member = memberShipService.getEntityByUserIdAndProjectId(user.getId(), projectId);
+        Optional<Member> member = memberShipService.getEntityByUserIdAndProjectId(user.getId(), projectId);
         throwExceptionIfUserNotInvolvedInThisProject(userCode, projectId);
 
         return currentAttendanceService.toResponse(dailyAttendanceService.recordAttendance(member.get(), project));
@@ -300,7 +300,7 @@ public class ProjectServiceImpl implements ProjectService {
     public CurrentAttendanceResponse endMemberAttendance(String userCode, Long projectId) {
         Project project = getById(projectId);
         User user = userService.getByCode(userCode);
-        Optional<MemberShip> member = memberShipService.getEntityByUserIdAndProjectId(user.getId(), projectId);
+        Optional<Member> member = memberShipService.getEntityByUserIdAndProjectId(user.getId(), projectId);
 
         throwExceptionIfUserNotInvolvedInThisProject(userCode, projectId);
 
@@ -310,7 +310,7 @@ public class ProjectServiceImpl implements ProjectService {
     public List<DailyAttendanceResponse> getAllDailyAttendancesByProjectIdAndUserCode(Long projectId, String userCode, Integer year, Integer month)  {
         getById(projectId);
         userService.getByCode(userCode);
-        MemberShip member = memberShipService.getByUserCodeAndProjectId(userCode, projectId);
+        Member member = memberShipService.getByUserCodeAndProjectId(userCode, projectId);
         return dailyAttendanceService.getAllByProjectIdAndMemberId(projectId, member.getId(), year, month)
                 .stream()
                 .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
@@ -337,7 +337,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         getById(projectId);
         userService.getByCode(userCode);
-        MemberShip member = memberShipService.getByUserCodeAndProjectId(userCode, projectId);
+        Member member = memberShipService.getByUserCodeAndProjectId(userCode, projectId);
 
         return dailyAttendanceService.getAllAbsencesByProjectIdAndMemberId(projectId, member.getId())
                 .stream()
@@ -407,7 +407,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
 
     }
-    private Task assignTaskToMember(Task task, MemberShip member) {
+    private Task assignTaskToMember(Task task, Member member) {
 
         throwExceptionIfTaskAlreadyAssignedToEmployee(task);
         task.setMember(member);
@@ -421,7 +421,7 @@ public class ProjectServiceImpl implements ProjectService {
         Task task = taskService.getById(taskId);
         User user = userService.getById(userId);
 
-        MemberShip member = memberShipService.getEntityByUserIdAndProjectId(userId, task.getProject().getId()).orElseThrow(
+        Member member = memberShipService.getEntityByUserIdAndProjectId(userId, task.getProject().getId()).orElseThrow(
                 () -> new RuntimeException("User with id = " + userId + " not involved in this project.")
         );
 

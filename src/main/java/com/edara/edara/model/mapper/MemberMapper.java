@@ -1,15 +1,15 @@
 package com.edara.edara.model.mapper;
 
-import com.edara.edara.model.dto.MemberShipRequest;
-import com.edara.edara.model.dto.MemberShipResponse;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.dto.MemberRequest;
+import com.edara.edara.model.dto.MemberResponse;
+import com.edara.edara.model.entity.Member;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface MemberShipMapper {
+public interface MemberMapper {
 
-    MemberShip toEntity(MemberShipRequest request);
+    Member toEntity(MemberRequest request);
 
     @Mapping(target = "employeeId", source = "entity.user.id")
     @Mapping(target = "employeeName", expression = "java(concatenateUserName(entity.getUser().getFirstName(), entity.getUser().getLastName()))")
@@ -17,7 +17,7 @@ public interface MemberShipMapper {
     @Mapping(target = "employeeCode", source = "entity.user.userCode")
     @Mapping(target = "joinDate", source = "entity.createdAt")
     @Mapping(target = "title", source = "entity.title.name")
-    MemberShipResponse toResponse(MemberShip entity);
+    MemberResponse toResponse(Member entity);
 
     default String concatenateUserName(String firstName, String lastName) {
         if (firstName == null && lastName == null) {

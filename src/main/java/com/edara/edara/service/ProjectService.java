@@ -15,9 +15,9 @@ public interface ProjectService extends CrudService<ProjectRequest, Project, Pro
      ProjectResponse add(ProjectRequest projectRequest);
 
 
-    MemberShipResponse addEmployeeToProject(MemberShipRequest memberShipRequest);
+    MemberResponse addEmployeeToProject(MemberRequest memberRequest);
     void deleteEmployeeFromProject(Long userId, Long projectId);
-    List<MemberShipResponse> getResponseAllEmployeesByProjectId(Long projectId);
+    List<MemberResponse> getResponseAllEmployeesByProjectId(Long projectId);
 
 
     CurrentAttendanceResponse recordMemberAttendance(String employeeCode, Long projectId);

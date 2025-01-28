@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberShipResponse {
+public class MemberResponse {
     @JsonProperty("id")
     private Long id;
 

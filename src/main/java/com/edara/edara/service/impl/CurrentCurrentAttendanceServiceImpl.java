@@ -3,7 +3,7 @@ package com.edara.edara.service.impl;
 import com.edara.edara.model.dto.CurrentAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.mapper.CurrentAttendanceMapper;
 import com.edara.edara.repository.CurrentAttendanceRepo;
@@ -49,7 +49,7 @@ public class CurrentCurrentAttendanceServiceImpl implements CurrentAttendanceSer
     }
 
     @Override
-    public CurrentAttendance recordCurrentAttendance(MemberShip member, Project project,DailyAttendance dailyAttendance) {
+    public CurrentAttendance recordCurrentAttendance(Member member, Project project, DailyAttendance dailyAttendance) {
         CurrentAttendance currentAttendance = create();
 
         currentAttendance.setMember(member);

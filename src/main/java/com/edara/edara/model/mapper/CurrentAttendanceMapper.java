@@ -5,7 +5,7 @@ import com.edara.edara.model.dto.DailyAttendanceResponse;
 import com.edara.edara.model.dto.DailyAttendancesOfUserResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -54,7 +54,7 @@ public interface CurrentAttendanceMapper {
 
         // Extract user-related data from the first DailyAttendance
         DailyAttendance firstAttendance = dailyAttendances.get(0);
-        MemberShip member = firstAttendance.getMember();
+        Member member = firstAttendance.getMember();
         User user = member.getUser();
 
         Long userId = user.getId();

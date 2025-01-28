@@ -18,7 +18,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "membership")
-public class MemberShip extends BaseEntity{
+public class Member extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,13 +61,13 @@ public class MemberShip extends BaseEntity{
 
     @OneToMany(mappedBy = "member",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the MemberShip is deleted.
+            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the Member is deleted.
     )
     private List<CurrentAttendance> currentAttendances = new ArrayList<>();
 
     @OneToMany(mappedBy = "member",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL //Deletes all dailyAttendances entities when the MemberShip is deleted.
+            cascade = CascadeType.ALL //Deletes all dailyAttendances entities when the Member is deleted.
     )
     private List<DailyAttendance> dailyAttendances  = new ArrayList<>();
 }

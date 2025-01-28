@@ -1,14 +1,14 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.exception.ConflictException;
-import com.edara.edara.model.dto.MemberShipRequest;
-import com.edara.edara.model.dto.MemberShipResponse;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.dto.MemberRequest;
+import com.edara.edara.model.dto.MemberResponse;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Title;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.ProjectRole;
-import com.edara.edara.model.mapper.MemberShipMapper;
+import com.edara.edara.model.mapper.MemberMapper;
 import com.edara.edara.repository.MemberShipRepo;
 import com.edara.edara.service.MemberShipService;
 import lombok.AllArgsConstructor;
@@ -24,56 +24,56 @@ import java.util.Optional;
 public class MemberShipServiceImpl implements MemberShipService {
 
     private final MemberShipRepo memberShipRepo;
-    private final MemberShipMapper memberShipMapper;
+    private final MemberMapper memberMapper;
 
-    public MemberShip toEntity(MemberShipRequest request) {
-        return memberShipMapper.toEntity(request);
+    public Member toEntity(MemberRequest request) {
+        return memberMapper.toEntity(request);
     }
 
-    public MemberShipResponse toResponse(MemberShip entity) {
-        return memberShipMapper.toResponse(entity);
+    public MemberResponse toResponse(Member entity) {
+        return memberMapper.toResponse(entity);
     }
 
-    public MemberShip create(MemberShipRequest memberShipRequest) {
-        MemberShip memberShip = toEntity(memberShipRequest);
-        return memberShip;
+    public Member create(MemberRequest memberRequest) {
+        Member member = toEntity(memberRequest);
+        return member;
     }
-    public MemberShip save(MemberShip memberShip) {
-        return memberShipRepo.save(memberShip);
+    public Member save(Member member) {
+        return memberShipRepo.save(member);
     }
 
-    public MemberShip add(User user, Project project, ProjectRole projectRole, Title title) {
+    public Member add(User user, Project project, ProjectRole projectRole, Title title) {
 
-        MemberShip newMemberShip = new MemberShip();
+        Member newMember = new Member();
 
-        newMemberShip.setUser(user);
-        newMemberShip.setProject(project);
-        newMemberShip.setProjectRole(projectRole);
-        newMemberShip.setTitle(title);
+        newMember.setUser(user);
+        newMember.setProject(project);
+        newMember.setProjectRole(projectRole);
+        newMember.setTitle(title);
 
-        project.getMemberShips().add(newMemberShip);
+        project.getMembers().add(newMember);
 
-        return save(newMemberShip);
+        return save(newMember);
     }
 
     @Override
-    public Optional<MemberShip> getEntityByUserIdAndProjectId(Long userId, Long projectId) {
+    public Optional<Member> getEntityByUserIdAndProjectId(Long userId, Long projectId) {
         return memberShipRepo.findByUserIdAndProjectId(userId, projectId);
     }
 
     @Override
-    public MemberShip getByUserIdAndProjectId(Long userId, Long projectId) {
+    public Member getByUserIdAndProjectId(Long userId, Long projectId) {
         return getEntityByUserIdAndProjectId(userId, projectId).orElseThrow(
                 () -> new ConflictException("User with id = " + userId + " not involved in this project.")
         );
     }
 
-    public Optional<MemberShip> getEntityByUserCodeAndProjectId(String userCode, Long projectId) {
+    public Optional<Member> getEntityByUserCodeAndProjectId(String userCode, Long projectId) {
         return memberShipRepo.findByUser_UserCodeAndProject_Id(userCode, projectId);
     }
 
     @Override
-    public MemberShip getByUserCodeAndProjectId(String userCode, Long projectId) {
+    public Member getByUserCodeAndProjectId(String userCode, Long projectId) {
         return getEntityByUserCodeAndProjectId(userCode, projectId).orElseThrow(
                 () -> new ConflictException("User with code = " + userCode + " not involved in this project.")
         );
@@ -81,46 +81,46 @@ public class MemberShipServiceImpl implements MemberShipService {
 
 
     @Override
-    public MemberShip updateEntity(Long aLong, MemberShip newEntity) {
+    public Member updateEntity(Long aLong, Member newEntity) {
         return null;
     }
 
     @Override
-    public MemberShipResponse update(Long aLong, MemberShipRequest memberShipRequest) {
+    public MemberResponse update(Long aLong, MemberRequest memberRequest) {
         return null;
     }
 
     @Transactional
     @Override
     public void delete(Long membershipId) {
-        MemberShip memberShip = getById(membershipId);
+        Member member = getById(membershipId);
 
-        memberShip.getProject().getMemberShips().remove(memberShip);
-        memberShip.getUser().getMemberShips().remove(memberShip);
+        member.getProject().getMembers().remove(member);
+        member.getUser().getMembers().remove(member);
 
         //memberShipRepo.deleteById(membershipId); // no need for this because orphanRemoval = true in the relation
-                                                   // MemberShip and (Project and User) .
+                                                   // Member and (Project and User) .
     }
 
     @Override
-    public Optional<MemberShip> getEntityById(Long membershipId) {
+    public Optional<Member> getEntityById(Long membershipId) {
         return memberShipRepo.findById(membershipId);
     }
 
     @Override
-    public MemberShip getById(Long membershipId) {
+    public Member getById(Long membershipId) {
         return getEntityById(membershipId).orElseThrow(
                 () -> new NoSuchElementException("There is no membership with id  = " + membershipId)
         );
     }
 
     @Override
-    public MemberShipResponse getResponseById(Long membershipId) {
+    public MemberResponse getResponseById(Long membershipId) {
         return toResponse(getById(membershipId));
     }
 
     @Override
-    public List<MemberShipResponse> getAll() {
+    public List<MemberResponse> getAll() {
         return null;
     }
 }

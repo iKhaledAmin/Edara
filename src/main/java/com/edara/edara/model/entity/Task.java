@@ -48,5 +48,5 @@ public class Task extends BaseEntity {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
     )
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = true)
-    private MemberShip member;
+    private Member member;
 }

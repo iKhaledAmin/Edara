@@ -33,8 +33,8 @@ public class User extends Person{
     @OneToMany(mappedBy = "user",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL, //Deletes all MemberShips entities when the Project is deleted.
-            orphanRemoval = true  // If you remove one of the MemberShip objects from the memberShips list
-            // JPA will automatically delete that MemberShip from the database as well.
+            orphanRemoval = true  // If you remove one of the Member objects from the members list
+            // JPA will automatically delete that Member from the database as well.
     )
-    private List<MemberShip> memberShips = new ArrayList<>();
+    private List<Member> members = new ArrayList<>();
 }

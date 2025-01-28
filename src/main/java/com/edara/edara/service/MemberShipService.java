@@ -1,8 +1,8 @@
 package com.edara.edara.service;
 
-import com.edara.edara.model.dto.MemberShipRequest;
-import com.edara.edara.model.dto.MemberShipResponse;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.dto.MemberRequest;
+import com.edara.edara.model.dto.MemberResponse;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Title;
 import com.edara.edara.model.entity.User;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public interface MemberShipService extends CrudService<MemberShipRequest, MemberShip, MemberShipResponse, Long> {
+public interface MemberShipService extends CrudService<MemberRequest, Member, MemberResponse, Long> {
 
-    MemberShip add(User user, Project project, ProjectRole projectRole, Title title);
+    Member add(User user, Project project, ProjectRole projectRole, Title title);
    //  void delete(User user, Project project);
-    Optional<MemberShip> getEntityByUserIdAndProjectId(Long userId, Long projectId);
-    MemberShip getByUserIdAndProjectId(Long userId, Long projectId);
+    Optional<Member> getEntityByUserIdAndProjectId(Long userId, Long projectId);
+    Member getByUserIdAndProjectId(Long userId, Long projectId);
 
-    Optional<MemberShip> getEntityByUserCodeAndProjectId(String userCode, Long projectId);
-    MemberShip getByUserCodeAndProjectId(String userCode, Long projectId);
+    Optional<Member> getEntityByUserCodeAndProjectId(String userCode, Long projectId);
+    Member getByUserCodeAndProjectId(String userCode, Long projectId);
 
 }
