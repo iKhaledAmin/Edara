@@ -41,13 +41,15 @@ public interface DailyAttendanceRepo extends JpaRepository<DailyAttendance, Long
             Long memberId, Long projectId, LocalDate day);
 
     List<DailyAttendance> findAllByProjectIdAndIsAggregatedTrue(Long projectId);
+
+    DailyAttendance findByMemberIdAndProjectIdAndEndTimeIsNullAndIsAggregatedFalse(Long memberId, Long projectId);
     List<DailyAttendance> findAllByProjectIdAndEndTimeIsNullAndIsAggregatedFalse(Long projectId);
 
     List<DailyAttendance> findAllByProjectIdAndMemberIdAndStartTimeNullAndEndTimeIsNull(Long projectId, Long memberId);
 
     List<DailyAttendance> findAllByProjectIdAndDateAndStartTimeNullAndEndTimeIsNull(Long projectId, LocalDate date);
-
     List<DailyAttendance> findAllByProjectIdAndStartTimeNullAndEndTimeIsNull(Long projectId);
+
 }
 
 

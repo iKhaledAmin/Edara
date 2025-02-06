@@ -4,7 +4,7 @@ import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.DailyAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Service
 public interface DailyAttendanceService {
-     DailyAttendance add( MemberShip member, Project project, LocalDateTime startTime);
+     DailyAttendance add(Member member, Project project, LocalDateTime startTime);
      DailyAttendanceResponse toResponse(DailyAttendance dailyAttendance);
 
      /**
@@ -33,12 +33,12 @@ public interface DailyAttendanceService {
       *
       * This method is transactional, ensuring that all database operations are executed as part of a single transaction.
       *
-      * @param member the {@link MemberShip} of the member whose attendance is being recorded
+      * @param member the {@link Member} of the member whose attendance is being recorded
       * @param project the {@link Project} in which the attendance is being recorded
       * @return the newly created {@link CurrentAttendance} object
       * @throws ConflictException if the member already has an active attendance session in the project
       */
-     CurrentAttendance recordAttendance(MemberShip member, Project project);
+     CurrentAttendance recordAttendance(Member member, Project project);
 
      /**
       * Ends the attendance session for a member in a specific project by retrieving the active
@@ -56,12 +56,12 @@ public interface DailyAttendanceService {
       *
       * This method is transactional, meaning that all the database operations will be committed as a single transaction.
       *
-      * @param member the {@link MemberShip} of the member whose attendance is being ended
+      * @param member the {@link Member} of the member whose attendance is being ended
       * @param project the {@link Project} in which the attendance session is being recorded
       * @return the updated {@link CurrentAttendance} object
       * @throws ConflictException if no active attendance record is found for the member in the project
       */
-     CurrentAttendance endAttendance(MemberShip member, Project project);
+     CurrentAttendance endAttendance(Member member, Project project);
 
 
      /**
@@ -159,6 +159,7 @@ public interface DailyAttendanceService {
       */
      List<DailyAttendance> getAllCurrentAttendancesByProjectId(Long projectId);
 
+     DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId);
 
      /**
       * Retrieves a list of {@link DailyAttendance} records representing all absences for a given member
@@ -217,8 +218,8 @@ public interface DailyAttendanceService {
       * Aggregates the daily attendance records for a given member and project.
       * <p>
       * This method first attempts to retrieve the existing {@link DailyAttendance} record for the specified
-      * {@link MemberShip} and {@link Project} on the current day using the {@link #getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse} method.
-      * If no such record exists, a new {@link DailyAttendance} entry is created using the {@link #add(MemberShip, Project)} method.
+      * {@link Member} and {@link Project} on the current day using the {@link #getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse} method.
+      * If no such record exists, a new {@link DailyAttendance} entry is created using the {@link #add(Member, Project)} method.
       * If the {@link DailyAttendance} is newly created, it will automatically be marked as aggregated.
       * </p>
       * <p>
@@ -234,9 +235,10 @@ public interface DailyAttendanceService {
       * aggregated only if current attendance records are present.
       * </p>
       *
-      * @param member The {@link MemberShip} of the member whose daily attendance is to be aggregated.
+      * @param member The {@link Member} of the member whose daily attendance is to be aggregated.
       * @param project The {@link Project} to which the member's attendance is associated.
       */
-     void aggregateDailyMemberAttendancesOfProject(MemberShip member, Project project);
+     void aggregateDailyMemberAttendancesOfProject(Member member, Project project);
+
 
 }

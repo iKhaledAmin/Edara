@@ -4,7 +4,7 @@ import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.DailyAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.mapper.DailyAttendanceMapper;
 import com.edara.edara.repository.DailyAttendanceRepo;
@@ -49,7 +49,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
     @Transactional
     @Override
-    public DailyAttendance add(MemberShip member, Project project, LocalDateTime startTime) {
+    public DailyAttendance add(Member member, Project project, LocalDateTime startTime) {
         /*
          * When this method is called, the `member` and `project` entities are likely
          * in a **detached state** because they were retrieved in a separate transaction
@@ -68,7 +68,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
          * to `dailyAttendance`. This allows Hibernate to correctly track changes and persist them
          * without errors.
          */
-        MemberShip managedMember = entityManager.merge(member);
+        Member managedMember = entityManager.merge(member);
         Project managedProject = entityManager.merge(project);
 
         DailyAttendance dailyAttendance = create(startTime);
@@ -79,7 +79,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
 
     @Transactional
-    public CurrentAttendance recordAttendance(MemberShip member, Project project) {
+    public CurrentAttendance recordAttendance(Member member, Project project) {
 
         // Check if there's an ongoing attendance record for the member in the project
         currentAttendanceService.getEntityByMemberIdAndProjectIdAndEndTimeIsNull(member.getId(),project.getId()).ifPresent(
@@ -102,7 +102,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     }
 
     @Transactional
-    public CurrentAttendance endAttendance(MemberShip member, Project project) {
+    public CurrentAttendance endAttendance(Member member, Project project) {
 
         // Retrieve the active attendance record for the member in the project
         CurrentAttendance currentAttendance = currentAttendanceService
@@ -170,6 +170,11 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     }
 
     @Override
+    public DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId) {
+        return dailyAttendanceRepo.findByMemberIdAndProjectIdAndEndTimeIsNullAndIsAggregatedFalse(memberId, projectId);
+    }
+
+    @Override
     public List<DailyAttendance> getAllAbsencesByProjectIdAndMemberId(Long projectId, Long memberId) {
         return dailyAttendanceRepo.findAllByProjectIdAndMemberIdAndStartTimeNullAndEndTimeIsNull(projectId,memberId);
 
@@ -220,7 +225,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
      * <p>
      * This method sorts the list of {@link CurrentAttendance} objects by their end time (with null values last).
      * It then checks the last record in the sorted list. If the end time of the last record is null,
-     * the method will finalize the attendance by calling {@link #endAttendance(MemberShip, Project)}.
+     * the method will finalize the attendance by calling {@link #endAttendance(Member, Project)}.
      * Finally, it returns the end time of the last attendance, either from the existing record or the finalized one.
      * </p>
      *
@@ -301,11 +306,11 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
 
 //    @Transactional
-//    public void aggregateDailyMemberAttendancesOfProject(MemberShip member, Project project) {
+//    public void aggregateDailyMemberAttendancesOfProject(Member member, Project project) {
 //        System.out.println("Aggregating daily attendances for member: " + member.getId() + " in project: " + project.getId());
 //        DailyAttendance dailyAttendance = getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(
 //                member.getId(), project.getId(), LocalDate.now()
-//        ).orElseGet(() -> add(member, project).setIsAggregated(true));
+//        ).orElseGet(() -> addNormalMember(member, project).setIsAggregated(true));
 //        System.out.println("Here1");
 //        if (!dailyAttendance.getCurrentAttendances().isEmpty()) {
 //            System.out.println("Here2");
@@ -315,7 +320,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
 
     @Transactional
-    public void aggregateDailyMemberAttendancesOfProject(MemberShip member, Project project) {
+    public void aggregateDailyMemberAttendancesOfProject(Member member, Project project) {
         //System.out.println("Aggregating daily attendances for member: " + member.getId() + " in project: " + project.getId());
 
         // Try to fetch an existing DailyAttendance

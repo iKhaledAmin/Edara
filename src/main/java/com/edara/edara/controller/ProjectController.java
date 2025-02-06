@@ -40,18 +40,28 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/add-employee")
-    public ResponseEntity<?> addEmployeeToProject(@RequestBody @Valid MemberShipRequest memberShipRequest) {
-        return new ResponseEntity<>(projectService.addEmployeeToProject(memberShipRequest), HttpStatus.CREATED);
+
+
+    @PostMapping("/add-member")
+    public ResponseEntity<?> addMemberToProject(@RequestBody @Valid MemberRequest memberRequest) {
+        return new ResponseEntity<>(projectService.addMemberToProject(memberRequest), HttpStatus.CREATED);
     }
-    @DeleteMapping("/delete-employee/{employeeId}/{projectId}")
-    public ResponseEntity<?> deleteEmployeeFromProject(@PathVariable Long employeeId, @PathVariable Long projectId) {
-        projectService.deleteEmployeeFromProject(employeeId, projectId);
+    @PutMapping("/update-member")
+    public ResponseEntity<?> updateMaberOfProject(@RequestBody @Valid MemberRequest projectRequest) {
+        return new ResponseEntity<>(projectService.updateMemberOfProject(projectRequest), HttpStatus.ACCEPTED);
+    }
+    @DeleteMapping("/delete-member/{userCode}/{projectId}")
+    public ResponseEntity<?> deleteMemberFromProject(@PathVariable String userCode, @PathVariable Long projectId) {
+        projectService.deleteMemberFromProject(userCode, projectId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    @GetMapping("/get-all-employees/{projectId}")
-    ResponseEntity<?> getAllEmployeesByProjectId( @PathVariable Long projectId){
-        return new ResponseEntity<>(this.projectService.getResponseAllEmployeesByProjectId(projectId), HttpStatus.OK);
+    @GetMapping("/get-member/{memberId}")
+    ResponseEntity<?> getMemeberOfProject( @PathVariable Long memberId){
+        return new ResponseEntity<>(this.projectService.getResponseMemberByMemberId(memberId), HttpStatus.OK);
+    }
+    @GetMapping("/get-all-members/{projectId}")
+    ResponseEntity<?> getAllMemebersByProjectId( @PathVariable Long projectId){
+        return new ResponseEntity<>(this.projectService.getResponseAllMembersByProjectId(projectId), HttpStatus.OK);
     }
 
 
@@ -112,7 +122,7 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/add-task/{projectId}")
+    @PostMapping("/addNormalMember-task/{projectId}")
     public ResponseEntity<?> addTaskToProject(@RequestBody @Valid TaskRequest taskRequest, @PathVariable Long projectId) {
         return new ResponseEntity<>(projectService.addTaskToProject(taskRequest,projectId), HttpStatus.CREATED);
     }
@@ -135,7 +145,7 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/add-title/{projectId}")
+    @PostMapping("/addNormalMember-title/{projectId}")
     public ResponseEntity<?> addTitleToProject(@RequestBody @Valid TitleRequest titleRequest, @PathVariable Long projectId) {
         return new ResponseEntity<>(projectService.addTitleToProject(titleRequest,projectId), HttpStatus.CREATED);
     }

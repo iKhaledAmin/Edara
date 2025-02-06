@@ -3,7 +3,7 @@ package com.edara.edara.service;
 import com.edara.edara.model.dto.CurrentAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.MemberShip;
+import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public interface CurrentAttendanceService {
      * @param project the project entity associated with the attendance
      * @return the newly created and saved {@code CurrentAttendance} entity
      */
-    CurrentAttendance recordCurrentAttendance(MemberShip member, Project project, DailyAttendance dailyAttendance);
+    CurrentAttendance recordCurrentAttendance(Member member, Project project, DailyAttendance dailyAttendance);
 
     CurrentAttendanceResponse toResponse(CurrentAttendance entity);
 

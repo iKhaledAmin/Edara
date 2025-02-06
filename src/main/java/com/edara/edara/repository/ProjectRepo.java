@@ -12,9 +12,9 @@ public interface ProjectRepo extends JpaRepository<Project,Long> {
     @Query("SELECT MAX(p.id) FROM Project p")
     Long getLastId();
 
-    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.memberShips")
+    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.members")
     List<Project> findAllWithMemberShips();
 
-    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.memberShips WHERE p.aggregationHour = :aggregationHour")
+    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.members WHERE p.aggregationHour = :aggregationHour")
     List<Project> findAllByAggregationHour(Integer aggregationHour);
 }

@@ -47,7 +47,7 @@ public class DailyAttendance {
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
     )
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false,updatable = false)
-    private MemberShip member;
+    private Member member;
 
     @ManyToOne( fetch = FetchType.LAZY,
             optional = false,

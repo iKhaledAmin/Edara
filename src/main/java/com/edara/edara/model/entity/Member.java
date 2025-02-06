@@ -1,6 +1,7 @@
 package com.edara.edara.model.entity;
 
-import com.edara.edara.model.enums.ProjectRole;
+import com.edara.edara.model.enums.MemberRole;
+import com.edara.edara.model.enums.MemberType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,8 +19,8 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "membership")
-public class MemberShip extends BaseEntity{
+@Table(name = "member")
+public class Member extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +28,15 @@ public class MemberShip extends BaseEntity{
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private ProjectRole projectRole;
+    @Column(name = "member_role",nullable = false)
+    private MemberRole memberRole;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_type",nullable = false)
+    private MemberType memberType;
+
+    @Column(name = "join_date",nullable = false)
+    private LocalDate joinDate;
 
 
     @ManyToOne( fetch = FetchType.LAZY,
@@ -61,13 +71,23 @@ public class MemberShip extends BaseEntity{
 
     @OneToMany(mappedBy = "member",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the MemberShip is deleted.
+            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the Member is deleted.
     )
     private List<CurrentAttendance> currentAttendances = new ArrayList<>();
 
     @OneToMany(mappedBy = "member",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL //Deletes all dailyAttendances entities when the MemberShip is deleted.
+            cascade = CascadeType.ALL //Deletes all dailyAttendances entities when the Member is deleted.
     )
     private List<DailyAttendance> dailyAttendances  = new ArrayList<>();
+
+    @OneToOne(
+            mappedBy = "member",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER,
+            optional = true
+    )
+    private Employee employee;
+
 }
