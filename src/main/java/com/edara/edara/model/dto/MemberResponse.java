@@ -1,6 +1,7 @@
 package com.edara.edara.model.dto;
 
-import com.edara.edara.model.enums.ProjectRole;
+import com.edara.edara.model.enums.MemberRole;
+import com.edara.edara.model.enums.MemberType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
@@ -9,39 +10,44 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberResponse {
-    @JsonProperty("id")
+
+    @JsonProperty("member_id")
     private Long id;
 
-    @JsonProperty("employee_id")
-    private Long employeeId;
+    @JsonProperty("member_code")
+    private String memberCode;
 
-    @JsonProperty("employee_name")
-    private String employeeName;
+    @JsonProperty("member_name")
+    private String memberName;
 
-    @JsonProperty("employee_image")
-    private String employeeImage;
+    @JsonProperty("member_image")
+    private String memberImage;
 
-    @JsonProperty("employee_code")
-    private String employeeCode;
-
-    @JsonProperty("project_name")
-    private String projectName;
-
-    @JsonProperty("project_role")
+    @JsonProperty("member_role")
     @Enumerated(EnumType.STRING)
-    private ProjectRole projectRole;
+    private MemberRole memberRole;
 
-    @JsonProperty("title")
+    @JsonProperty("member_title")
     private String title;
+
+    @JsonProperty("member_type")
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType;
+
 
     @JsonFormat(pattern="yyyy-MM-dd")
     @JsonProperty("join_date")
-    private Date joinDate;
+    private LocalDate joinDate;
+
+
+    @JsonProperty("employee_details")
+    private EmployeeResponse employeeDetails;
+
 
 }

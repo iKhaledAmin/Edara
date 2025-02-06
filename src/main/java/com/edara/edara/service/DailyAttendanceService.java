@@ -159,6 +159,7 @@ public interface DailyAttendanceService {
       */
      List<DailyAttendance> getAllCurrentAttendancesByProjectId(Long projectId);
 
+     DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId);
 
      /**
       * Retrieves a list of {@link DailyAttendance} records representing all absences for a given member
@@ -238,5 +239,6 @@ public interface DailyAttendanceService {
       * @param project The {@link Project} to which the member's attendance is associated.
       */
      void aggregateDailyMemberAttendancesOfProject(Member member, Project project);
+
 
 }

@@ -170,6 +170,11 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     }
 
     @Override
+    public DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId) {
+        return dailyAttendanceRepo.findByMemberIdAndProjectIdAndEndTimeIsNullAndIsAggregatedFalse(memberId, projectId);
+    }
+
+    @Override
     public List<DailyAttendance> getAllAbsencesByProjectIdAndMemberId(Long projectId, Long memberId) {
         return dailyAttendanceRepo.findAllByProjectIdAndMemberIdAndStartTimeNullAndEndTimeIsNull(projectId,memberId);
 
@@ -305,7 +310,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 //        System.out.println("Aggregating daily attendances for member: " + member.getId() + " in project: " + project.getId());
 //        DailyAttendance dailyAttendance = getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(
 //                member.getId(), project.getId(), LocalDate.now()
-//        ).orElseGet(() -> add(member, project).setIsAggregated(true));
+//        ).orElseGet(() -> addNormalMember(member, project).setIsAggregated(true));
 //        System.out.println("Here1");
 //        if (!dailyAttendance.getCurrentAttendances().isEmpty()) {
 //            System.out.println("Here2");

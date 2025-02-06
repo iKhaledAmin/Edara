@@ -1,9 +1,11 @@
 package com.edara.edara.model.dto;
 
-import com.edara.edara.model.enums.ProjectRole;
+import com.edara.edara.model.enums.MemberRole;
+import com.edara.edara.model.enums.MemberType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,16 +20,25 @@ public class MemberRequest {
     @NotNull(message = "Project id must not be null")
     private Long projectId;
 
-    @JsonProperty("user_id")
-    @NotNull(message = "User id must not be null")
-    private Long userId;
+    @JsonProperty("user_code")
+    @NotNull(message = "User code must not be null")
+    private String userCode;
 
     @JsonProperty("title_id")
     private Long titleId;
 
-    @JsonProperty("project_role")
-    @NotNull(message = "Project role must not be null")
+    @JsonProperty("member_role")
+    @NotNull(message = "Member role must not be null")
     @Enumerated(EnumType.STRING)
-    private ProjectRole projectRole;
+    private MemberRole memberRole;
+
+    @JsonProperty("member_type")
+    @NotNull(message = "Member type must not be null")
+    @Enumerated(EnumType.STRING)
+    private MemberType memberType;
+
+    @JsonProperty("employee_details")
+    @Valid
+    private EmployeeRequest employeeRequest;
 
 }
