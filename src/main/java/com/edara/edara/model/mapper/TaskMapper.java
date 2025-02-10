@@ -15,9 +15,9 @@ public interface TaskMapper {
     TaskResponse toResponse(Task entity);
 
     @AfterMapping
-    default void setEmployeeName(@MappingTarget TaskResponse response, Task entity) {
+    default void setMemberName(@MappingTarget TaskResponse response, Task entity) {
         if (entity.getMember() != null && entity.getMember().getUser() != null) {
-            response.setEmployeeName(entity.getMember().getUser().getFirstName() + " " + entity.getMember().getUser().getLastName());
+            response.setMemberName(entity.getMember().getUser().getFirstName() + " " + entity.getMember().getUser().getLastName());
         }
     }
 }

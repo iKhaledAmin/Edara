@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepo projectRepo;
     private final ProjectMapper projectMapper;
-    private final TaskService taskService;
     private final MemberService memberService;
     private final UserServiceImpl userService;
     private final TitleService titleService;
     private final CurrentAttendanceService currentAttendanceService;
     private final DailyAttendanceService dailyAttendanceService;
     private final NonNullBeanUtils nonNullBeanUtils;
+
 
 
 
@@ -238,8 +238,8 @@ public class ProjectServiceImpl implements ProjectService {
 
         throwExceptionIfMemberAlreadyExistsInProject(user, project);
 
-        Title title = (memberRequest.getTitleId() != null) ? titleService.getById(memberRequest.getTitleId()) : null;
-
+        //Title title = (memberRequest.getTitleId() != null) ? titleService.getById(memberRequest.getTitleId()) : null;
+        Title title = null;
         EmployeeRequest employeeRequest = memberRequest.getEmployeeRequest();
 
         Member newMember = memberService.add(
@@ -388,98 +388,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
-
-    private void throwExceptionIfProjectIncludeTaskWithSameName(String taskName , Project project) {
-
-        boolean hasSameTaskName = project.getTasks().stream()
-                .anyMatch(task -> task.getName().equalsIgnoreCase(taskName));
-
-        if (hasSameTaskName) {
-            throw new RuntimeException("Task with same name already exists in this project.");
-        }
-    }
-    @Override
-    public TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId) {
-
-        Project project = getById(projectId);
-        throwExceptionIfProjectIncludeTaskWithSameName(taskRequest.getName(), project);
-
-        Task newTask = taskService.create(taskRequest);
-
-        project.getTasks().add(newTask);
-        newTask.setProject(project);
-
-        newTask = taskService.save(newTask);
-        if (taskRequest.getEmployeeId() != null) {
-            return assignTaskToMember(newTask.getId(), taskRequest.getEmployeeId());
-        }
-        return taskService.toResponse(newTask);
-    }
-
-    private void throwExceptionIfTaskOnWorking(Task task) {
-
-        if (task.getStatus().equals(TaskStatus.ON_WORKING)) {
-            throw new RuntimeException("Task is already in on working.");
-        }
-    }
-
-    @Override
-    @Transactional
-    public void deleteTaskFromProject(Long taskId) {
-        Task task = taskService.getById(taskId);
-        throwExceptionIfTaskOnWorking(task);
-        Project project = getById(task.getProject().getId());
-        project.getTasks().remove(task); // This triggers deletion of task due to orphanRemoval = true
-    }
-
-    private void throwExceptionIfTaskAlreadyAssignedToEmployee(Task task) {
-
-        if (task.getMember() != null) {
-            throw new RuntimeException("Task already assigned to employee.");
-        }
-
-    }
-    private Task assignTaskToMember(Task task, Member member) {
-
-        throwExceptionIfTaskAlreadyAssignedToEmployee(task);
-        task.setMember(member);
-        task.setStatus(TaskStatus.ON_WORKING);
-
-        member.getTasks().add(task);
-
-        return taskService.save(task);
-    }
-    public TaskResponse assignTaskToMember(Long taskId, Long userId) {
-        Task task = taskService.getById(taskId);
-        User user = userService.getById(userId);
-
-        Member member = memberService.getEntityByUserIdAndProjectId(userId, task.getProject().getId()).orElseThrow(
-                () -> new RuntimeException("User with id = " + userId + " not involved in this project.")
-        );
-
-        Task aasignedTask = assignTaskToMember(task, member);
-
-        return taskService.toResponse(aasignedTask);
-    }
-
-    public List<Task> getAllTasksByProjectId(Long projectId) {
-        Project project = getById(projectId);
-        return project.getTasks();
-    }
-
-    public List<TaskResponse> getResponseAllTasksByProjectId(Long projectId) {
-        List<Task> projectTasks = getAllTasksByProjectId(projectId);
-        return projectTasks.stream().map(taskService::toResponse).toList();
-    }
-
-    public List<Task> getAllTasksByUserId(Long userId) {
-        return taskService.getAllByUserId(userId);
-    }
-    public List<TaskResponse> getResponseAllTasksByUserId(Long userId) {
-        List<Task> projectTasks = getAllTasksByUserId(userId);
-        return projectTasks.stream().map(taskService::toResponse).toList();
-    }
-
     private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Project project) {
         boolean hasSameTitleName = project.getTitles().stream()
                 .anyMatch(title -> title.getName().equalsIgnoreCase(titleName));
@@ -503,9 +411,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void deleteTitleFromProject(Long titleId) {
-        Title title = titleService.getById(titleId);
-        Project project = getById(title.getProject().getId());
-        project.getTitles().remove(title); // This triggers deletion of task due to orphanRemoval = true
+//        Title title = titleService.getById(titleId);
+//        Project project = getById(title.getProject().getId());
+//        project.getTitles().remove(title); // This triggers deletion of task due to orphanRemoval = true
     }
 
     public List<TitleResponse> getResponseAllTitlesByProjectId(Long projectId){

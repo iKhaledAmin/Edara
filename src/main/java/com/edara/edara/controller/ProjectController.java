@@ -122,27 +122,6 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/addNormalMember-task/{projectId}")
-    public ResponseEntity<?> addTaskToProject(@RequestBody @Valid TaskRequest taskRequest, @PathVariable Long projectId) {
-        return new ResponseEntity<>(projectService.addTaskToProject(taskRequest,projectId), HttpStatus.CREATED);
-    }
-    @DeleteMapping("/delete-task/{taskId}")
-    public ResponseEntity<?> deleteTaskFromProject(@PathVariable Long taskId) {
-        projectService.deleteTaskFromProject(taskId);
-        return new ResponseEntity<>("Deleted Successfully", HttpStatus.ACCEPTED);
-    }
-    @PutMapping("/assign-task/{taskId}/{employeeId}")
-    public ResponseEntity<?> assignTaskToEmployee(@PathVariable Long taskId, @PathVariable Long employeeId) {
-        return new ResponseEntity<>( projectService.assignTaskToMember(taskId,employeeId), HttpStatus.ACCEPTED);
-    }
-    @GetMapping("/get-all-project-tasks/{projectId}")
-    ResponseEntity<?> getAllTasksByProjectId( @PathVariable Long projectId){
-        return new ResponseEntity<>(this.projectService.getResponseAllTasksByProjectId(projectId), HttpStatus.OK);
-    }
-    @GetMapping("/get-all-user-tasks/{userId}")
-    ResponseEntity<?> getAllTasksByUserId( @PathVariable Long userId){
-        return new ResponseEntity<>(this.projectService.getResponseAllTasksByUserId(userId), HttpStatus.OK);
-    }
 
 
     @PostMapping("/addNormalMember-title/{projectId}")

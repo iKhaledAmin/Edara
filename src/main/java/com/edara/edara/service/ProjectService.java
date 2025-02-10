@@ -4,7 +4,6 @@ package com.edara.edara.service;
 import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.*;
 import com.edara.edara.model.entity.Project;
-import com.edara.edara.model.entity.Task;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.MemberType;
 import org.springframework.stereotype.Service;
@@ -117,17 +116,6 @@ public interface ProjectService extends CrudService<ProjectRequest, Project, Pro
     List<DailyAttendanceResponse> getAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode);
     List<DailyAttendanceResponse> getAllAbsencesByProjectId(Long projectId, LocalDate date);
 
-    TaskResponse addTaskToProject(TaskRequest taskRequest, Long projectId);
-    void deleteTaskFromProject(Long taskId);
-    TaskResponse assignTaskToMember(Long taskId, Long userId);
-
-
-    List<Task> getAllTasksByProjectId(Long projectId);
-    List<TaskResponse> getResponseAllTasksByProjectId(Long projectId);
-
-
-     List<Task> getAllTasksByUserId(Long userId);
-     List<TaskResponse> getResponseAllTasksByUserId(Long userId);
 
 
      TitleResponse addTitleToProject(TitleRequest titleRequest, Long projectId);

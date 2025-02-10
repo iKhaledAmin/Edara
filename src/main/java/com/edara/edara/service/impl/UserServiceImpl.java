@@ -11,8 +11,8 @@ import com.edara.edara.service.PersonService;
 import com.edara.edara.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService  {
+public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;

@@ -86,12 +86,19 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/addNormalMember-title/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete-title/{titleId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-project-titles/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/tasks/get-by-id/{taskId}").hasAuthority("USER")
-                        .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
-                        .requestMatchers("/tasks/finish-task/{taskId}").hasAuthority("USER")
+
                         .requestMatchers("/titles/get-by-id/{titleId}").hasAuthority("USER")
                         .requestMatchers("/titles/update/{titleId}").hasAuthority("USER")
                         .requestMatchers("/auth/login", "/users/register").permitAll()
+                        .requestMatchers("/tasks/add").hasAuthority("USER")
+                        .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/delete/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/get/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/finish/{taskId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/assign-to-member/{taskId}/{userCode}").hasAuthority("USER")
+                        .requestMatchers("/tasks/get-all-of-member/{userCode}").hasAuthority("USER")
+                        .requestMatchers("/tasks/get-all-of-project/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/tasks/get-all-of-member-in-project/{userCode}/{projectId}").hasAuthority("USER")
                 );
         //http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));

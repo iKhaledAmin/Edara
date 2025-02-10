@@ -1,0 +1,37 @@
+package com.edara.edara.service.impl;
+
+import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Task;
+import com.edara.edara.service.BaseEntityRetrievalService;
+import com.edara.edara.service.EntityRetrievalService;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@AllArgsConstructor
+@Service
+public class EntityRetrievalServiceImpl implements EntityRetrievalService {
+    private final BaseEntityRetrievalService<Project, Long> projectService;
+    private final BaseEntityRetrievalService<Task, Long> taskService;
+
+    @Override
+    public Optional<Project> getOptionalProjectById(Long projectId) {
+        return projectService.getEntityById(projectId);
+    }
+
+    @Override
+    public Project getProjectById(Long projectId) {
+        return projectService.getById(projectId);
+    }
+
+    @Override
+    public Optional<Task> getOptionalTaskById(Long taskId) {
+        return taskService.getEntityById(taskId);
+    }
+
+    @Override
+    public Task getTaskById(Long taskId) {
+        return taskService.getById(taskId);
+    }
+}

@@ -27,8 +27,8 @@ public class TaskResponse {
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
-    @JsonProperty("employee_name")
-    private String employeeName;
+    @JsonProperty("member_name")
+    private String memberName;
 
     @JsonProperty("project_name")
     private String projectName;

@@ -57,7 +57,8 @@ public class Member extends BaseEntity{
 
     @OneToMany(mappedBy = "member",
             fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH},
+            orphanRemoval = true
     )
     private List<Task> tasks = new ArrayList<>();
 
