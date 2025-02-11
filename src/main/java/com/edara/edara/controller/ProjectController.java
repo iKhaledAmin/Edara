@@ -23,17 +23,14 @@ public class ProjectController {
     public ResponseEntity<?> addProject(@RequestBody @Valid ProjectRequest projectRequest) {
         return new ResponseEntity<>(projectService.add(projectRequest), HttpStatus.CREATED);
     }
-
     @PutMapping("/update/{projectId}")
     public ResponseEntity<?> updateProject(@RequestBody @Valid ProjectRequest projectRequest, @PathVariable Long projectId) {
         return new ResponseEntity<>(projectService.update(projectId,projectRequest), HttpStatus.ACCEPTED);
     }
-
     @GetMapping("/get-by-id/{projectId}")
     public ResponseEntity<?> getManagerById(@PathVariable Long projectId){
         return new ResponseEntity<>(this.projectService.getResponseById(projectId),HttpStatus.OK);
     }
-
     @DeleteMapping("/delete/{projectId}")
     public ResponseEntity<?> deleteById(@PathVariable Long projectId) {
         projectService.delete(projectId);
@@ -41,28 +38,6 @@ public class ProjectController {
     }
 
 
-
-    @PostMapping("/add-member")
-    public ResponseEntity<?> addMemberToProject(@RequestBody @Valid MemberRequest memberRequest) {
-        return new ResponseEntity<>(projectService.addMemberToProject(memberRequest), HttpStatus.CREATED);
-    }
-    @PutMapping("/update-member")
-    public ResponseEntity<?> updateMaberOfProject(@RequestBody @Valid MemberRequest projectRequest) {
-        return new ResponseEntity<>(projectService.updateMemberOfProject(projectRequest), HttpStatus.ACCEPTED);
-    }
-    @DeleteMapping("/delete-member/{userCode}/{projectId}")
-    public ResponseEntity<?> deleteMemberFromProject(@PathVariable String userCode, @PathVariable Long projectId) {
-        projectService.deleteMemberFromProject(userCode, projectId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-    @GetMapping("/get-member/{memberId}")
-    ResponseEntity<?> getMemeberOfProject( @PathVariable Long memberId){
-        return new ResponseEntity<>(this.projectService.getResponseMemberByMemberId(memberId), HttpStatus.OK);
-    }
-    @GetMapping("/get-all-members/{projectId}")
-    ResponseEntity<?> getAllMemebersByProjectId( @PathVariable Long projectId){
-        return new ResponseEntity<>(this.projectService.getResponseAllMembersByProjectId(projectId), HttpStatus.OK);
-    }
 
 
     @PostMapping("/record-attendance/{userCode}/{projectId}")

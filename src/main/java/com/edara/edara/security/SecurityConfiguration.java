@@ -69,7 +69,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/get-by-id/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/add-member").hasAuthority("USER")
                         .requestMatchers("/projects/update-member").hasAuthority("USER")
                         .requestMatchers("/projects/delete-member/{userCode}/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-member/{memberId}").hasAuthority("USER")
@@ -86,10 +85,20 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/addNormalMember-title/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete-title/{titleId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-project-titles/{projectId}").hasAuthority("USER")
-
                         .requestMatchers("/titles/get-by-id/{titleId}").hasAuthority("USER")
                         .requestMatchers("/titles/update/{titleId}").hasAuthority("USER")
+
+
                         .requestMatchers("/auth/login", "/users/register").permitAll()
+
+                        .requestMatchers("/members/add").hasAuthority("USER")
+                        .requestMatchers("/members/update/{memberId}").hasAuthority("USER")
+                        .requestMatchers("/members/delete/{userCode}/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/members/get/{memberId}").hasAuthority("USER")
+                        .requestMatchers("/members/get-all-of-project/{projectId}").hasAuthority("USER")
+
+
+
                         .requestMatchers("/tasks/add").hasAuthority("USER")
                         .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")
                         .requestMatchers("/tasks/delete/{taskId}").hasAuthority("USER")

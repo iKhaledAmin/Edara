@@ -2,9 +2,11 @@ package com.edara.edara.service.impl;
 
 import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.*;
-import com.edara.edara.model.entity.*;
+import com.edara.edara.model.entity.Member;
+import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Title;
+import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.MemberRole;
-import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.ProjectMapper;
 import com.edara.edara.repository.ProjectRepo;
 import com.edara.edara.service.*;
@@ -222,96 +224,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
-
-    private void throwExceptionIfMemberAlreadyExistsInProject(User user, Project project) {
-        if (project.getMembers() != null && project.getMembers().stream()
-                .anyMatch(member -> member.getUser().equals(user))) {
-            throw new ConflictException("Member already exists in the project.");
-        }
-    }
-
-    @Transactional
-    @Override
-    public MemberResponse addMemberToProject(MemberRequest memberRequest) {
-        Project project = getById(memberRequest.getProjectId());
-        User user = userService.getByCode(memberRequest.getUserCode());
-
-        throwExceptionIfMemberAlreadyExistsInProject(user, project);
-
-        //Title title = (memberRequest.getTitleId() != null) ? titleService.getById(memberRequest.getTitleId()) : null;
-        Title title = null;
-        EmployeeRequest employeeRequest = memberRequest.getEmployeeRequest();
-
-        Member newMember = memberService.add(
-                user,
-                project,
-                memberRequest.getMemberRole(),
-                memberRequest.getMemberType(),
-                title,
-                (employeeRequest != null) ? employeeRequest.getType() : null,
-                (employeeRequest != null) ? employeeRequest.getBaseSalary() : null,
-                (employeeRequest != null) ? employeeRequest.getBonusSalary() : null
-        );
-
-        return memberService.toResponse(newMember);
-    }
-
-    @Override
-    public MemberResponse updateMemberOfProject(MemberRequest memberRequest) {
-        if (memberRequest == null)
-            return null;
-
-        getById(memberRequest.getProjectId());
-        userService.getByCode(memberRequest.getUserCode());
-        Member member = memberService.getByUserCodeAndProjectId(memberRequest.getUserCode(), memberRequest.getProjectId());
-
-        return memberService.update(member.getId(), memberRequest);
-
-    }
-
-    public MemberResponse getResponseMemberOfProjectByMemberId(Long memberId) {
-        return memberService.getResponseById(memberId);
-    }
-
-    private void throwExceptionIfMemberStillWorkingOnTask(Member member) {
-        if (member.getTasks().stream()
-                .anyMatch(task -> task.getStatus().equals(TaskStatus.ON_WORKING))) {
-            throw new ConflictException("Member is still working on a task.");
-        }
-    }
-
-
-    @Transactional
-    @Override
-    public void deleteMemberFromProject(String userCode, Long projectId) {
-        User user = userService.getByCode(userCode);
-        Project project = getById(projectId);
-
-        Member member = memberService.getByUserCodeAndProjectId(userCode, projectId);
-        throwExceptionIfMemberStillWorkingOnTask((member));
-
-        DailyAttendance dailyAttendance = dailyAttendanceService.getCurrentAttendanceByMemberIdAndProjectId( member.getId(), projectId);
-        if (dailyAttendance != null) {
-            dailyAttendanceService.endAttendance(member, project);
-        }
-
-        user.getMembers().remove(member);
-        project.getMembers().remove(member);
-
-        //memberService.deleteById(membershipId); //no need for this because orphanRemoval = true in the relation
-        // Member and (Project and User) .
-    }
-
-    @Override
-    public List<MemberResponse> getResponseAllMembersByProjectId(Long projectId) {
-        Project project = getById(projectId);
-        return project.getMembers().stream()
-                .map(memberService::toResponse)
-                .toList();
-    }
-    public MemberResponse getResponseMemberByMemberId(Long memberId) {
-        return memberService.getResponseById(memberId);
-    }
 
     private void throwExceptionIfUserNotInvolvedInThisProject(String userCode, Long projectId) {
 

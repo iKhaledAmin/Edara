@@ -1,27 +1,27 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.exception.ConflictException;
+import com.edara.edara.model.dto.EmployeeRequest;
 import com.edara.edara.model.dto.MemberRequest;
 import com.edara.edara.model.dto.MemberResponse;
-import com.edara.edara.model.entity.Member;
-import com.edara.edara.model.entity.Project;
-import com.edara.edara.model.entity.Title;
-import com.edara.edara.model.entity.User;
+import com.edara.edara.model.entity.*;
 import com.edara.edara.model.enums.EmployeeType;
 import com.edara.edara.model.enums.MemberRole;
 import com.edara.edara.model.enums.MemberType;
+import com.edara.edara.model.enums.TaskStatus;
 import com.edara.edara.model.mapper.MemberMapper;
 import com.edara.edara.repository.MemberRepo;
-import com.edara.edara.service.EmployeeService;
-import com.edara.edara.service.MemberService;
+import com.edara.edara.service.*;
 import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -30,6 +30,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepo memberRepo;
     private final MemberMapper memberMapper;
     private final EmployeeService employeeService;
+    private final ServiceLocator serviceLocator;
     private final NonNullBeanUtils nonNullBeanUtils;
 
     @Override
@@ -74,12 +75,8 @@ public class MemberServiceImpl implements MemberService {
         return save(newMember); // Save updated Member with linked Employee
     }
 
-    @Override
-    public Member add(User user, Project project, MemberRole memberRole, Title title) {
-        return addNormalMember(user, project, memberRole, title);
-    }
-    @Override
-    public Member add(User user, Project project, MemberRole memberRole,MemberType memberType, Title title, EmployeeType employeeType, Double baseSalary, Double bonusSalary) {
+
+    private Member addMember(User user, Project project, MemberRole memberRole,MemberType memberType, Title title, EmployeeType employeeType, Double baseSalary, Double bonusSalary) {
         Member newMember = (memberType == MemberType.EMPLOYEE_MEMBER)
                 ? addEmployeeMember(
                 user,
@@ -94,6 +91,44 @@ public class MemberServiceImpl implements MemberService {
 
         return newMember;
     }
+
+
+    private void throwExceptionIfMemberAlreadyExistsInProject(User user, Project project) {
+        if (memberRepo.existsByUserAndProject(user, project)) {
+            throw new ConflictException("Member already exists in the project.");
+        }
+    }
+    @Override
+    public Member add(User user, Project project, MemberRole memberRole, Title title) {
+        return addNormalMember(user, project, memberRole, title);
+    }
+
+    @Transactional
+    @Override
+    public MemberResponse add(MemberRequest memberRequest) {
+        Project project = serviceLocator.getService(ProjectService.class).getById(memberRequest.getProjectId());
+        User user = serviceLocator.getService(UserService.class).getByCode(memberRequest.getUserCode());
+
+        throwExceptionIfMemberAlreadyExistsInProject(user, project);
+
+        Title title = (memberRequest.getTitleId() != null) ? serviceLocator.getService(TitleService.class).getById(memberRequest.getTitleId()) : null;
+        EmployeeRequest employeeRequest = memberRequest.getEmployeeRequest();
+
+        Member newMember = addMember(
+                user,
+                project,
+                memberRequest.getMemberRole(),
+                memberRequest.getMemberType(),
+                title,
+                (employeeRequest != null) ? employeeRequest.getType() : null,
+                (employeeRequest != null) ? employeeRequest.getBaseSalary() : null,
+                (employeeRequest != null) ? employeeRequest.getBonusSalary() : null
+        );
+
+        return toResponse(newMember);
+    }
+
+
 
     @Override
     public Optional<Member> getEntityByUserIdAndProjectId(Long userId, Long projectId) {
@@ -122,8 +157,6 @@ public class MemberServiceImpl implements MemberService {
 
 
     private Member updateEntity(Long memberId, Member newMember) {
-        if (memberId == null || newMember == null)
-            return null;
 
         Member existedMember = getById(memberId);
 
@@ -146,8 +179,10 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponse update(Long memberId, MemberRequest memberRequest) {
-        if (memberId == null || memberRequest == null)
-            return null;
+
+        serviceLocator.getService(ProjectService.class).getById(memberRequest.getProjectId());
+        serviceLocator.getService(UserService.class).getByCode(memberRequest.getUserCode());
+        getByUserCodeAndProjectId(memberRequest.getUserCode(), memberRequest.getProjectId());
 
         Member newMember = toEntity(memberRequest);
         Member existedMember = updateEntity(memberId,newMember);
@@ -155,19 +190,36 @@ public class MemberServiceImpl implements MemberService {
         return memberMapper.toResponse(existedMember);
     }
 
+    private void throwExceptionIfMemberStillWorkingOnTask(Member member) {
+        if (member.getTasks().stream()
+                .anyMatch(task -> task.getStatus().equals(TaskStatus.ON_WORKING))) {
+            throw new ConflictException("Member is still working on a task.");
+        }
+    }
+
 
     @Transactional
     @Override
-    public void delete(Long memberId) {
-        if (memberId == null) return;
-        Member member = getById(memberId);
+    public void delete(String userCode, Long projectId) {
 
-        member.getProject().getMembers().remove(member);
-        member.getUser().getMembers().remove(member);
+        User user = serviceLocator.getService(UserService.class).getByCode(userCode);
+        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
+        Member member = getByUserCodeAndProjectId(userCode, projectId);
 
-        //memberRepo.deleteById(membershipId); // no need for this because orphanRemoval = true in the relation
-                                                   // Member and (Project and User) .
+        throwExceptionIfMemberStillWorkingOnTask((member));
+
+        DailyAttendance dailyAttendance =
+                serviceLocator.getService(DailyAttendanceService.class).getCurrentAttendanceByMemberIdAndProjectId( member.getId(), projectId);
+        if (dailyAttendance != null) {
+            serviceLocator.getService(DailyAttendanceService.class).endAttendance(member, project);
+        }
+
+        user.getMembers().remove(member);
+        project.getMembers().remove(member);
+        memberRepo.delete(member);
+
     }
+
 
     @Override
     public Optional<Member> getEntityById(Long memberId) {
@@ -184,5 +236,15 @@ public class MemberServiceImpl implements MemberService {
         return toResponse(getById(memberId));
     }
 
+    @Override
+    public List<Member> getAllByProjectId(Long projectId) {
+        return memberRepo.findAllByProjectId(projectId);
+    }
 
+    @Override
+    public List<MemberResponse> getAllResponseByProjectId(Long projectId) {
+        return getAllByProjectId(projectId).stream()
+                .map(memberMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }
