@@ -1,16 +1,13 @@
 package com.edara.edara.controller;
 
-import com.edara.edara.model.dto.*;
+import com.edara.edara.model.dto.ProjectRequest;
+import com.edara.edara.model.dto.TitleRequest;
 import com.edara.edara.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/projects")
@@ -37,64 +34,6 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
-
-
-    @PostMapping("/record-attendance/{userCode}/{projectId}")
-    public ResponseEntity<?> recordMemberAttendance(@PathVariable String userCode, @PathVariable Long projectId) {
-
-        CurrentAttendanceResponse response = projectService.recordMemberAttendance(userCode, projectId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-    @PutMapping("/end-attendance/{userCode}/{projectId}")
-    public ResponseEntity<?> endMemberAttendance(@PathVariable String userCode, @PathVariable Long projectId) {
-
-        CurrentAttendanceResponse response = projectService.endMemberAttendance(userCode, projectId);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
-    }
-    @GetMapping("/get-all-daily-attendances/{projectId}/{userCode}")
-    ResponseEntity<?> getAllDailyAttendancesByProjectIdAndUserId(@PathVariable Long projectId,
-                                                                   @PathVariable String userCode,
-                                                                   @RequestParam(required = false) Integer year,
-                                                                   @RequestParam(required = false) Integer month) {
-        List<DailyAttendanceResponse> responses =
-                projectService.getAllDailyAttendancesByProjectIdAndUserCode(projectId, userCode, year, month);
-
-        return ResponseEntity.ok(responses);
-    }
-    @GetMapping("/get-all-daily-attendances/{projectId}")
-    ResponseEntity<?> getAllDailyAttendancesByProjectId(@PathVariable Long projectId,
-                                                                   @RequestParam(required = false) LocalDateTime date) {
-        List<DailyAttendanceResponse> responses =
-                projectService.getAllDailyAttendancesByProjectId(projectId, date);
-
-        return ResponseEntity.ok(responses);
-    }
-    @GetMapping("/get-all-daily-current-attendances/{projectId}")
-    ResponseEntity<?> getAllDailyCurrentAttendancesByProjectId(@PathVariable Long projectId) {
-        List<DailyAttendanceResponse> responses =
-                projectService.getAllCurrentAttendancesByProjectId(projectId);
-
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/get-all-absences/{projectId}/{userCode}")
-    ResponseEntity<?> getAllAbsencesByProjectIdAndUserId(@PathVariable Long projectId,
-                                                         @PathVariable String userCode) {
-        List<DailyAttendanceResponse> responses =
-                projectService.getAllAbsencesByProjectIdAndUserCode(projectId, userCode);
-
-        return ResponseEntity.ok(responses);
-    }
-
-    @GetMapping("/get-all-absences/{projectId}")
-    ResponseEntity<?> getAllAbsencesByProjectId(@PathVariable Long projectId,
-                                                @RequestParam(required = false) LocalDate date) {
-        List<DailyAttendanceResponse> responses =
-                projectService.getAllAbsencesByProjectId(projectId, date);
-
-        return ResponseEntity.ok(responses);
-    }
 
 
 

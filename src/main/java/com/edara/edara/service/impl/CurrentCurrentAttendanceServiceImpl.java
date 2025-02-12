@@ -3,8 +3,6 @@ package com.edara.edara.service.impl;
 import com.edara.edara.model.dto.CurrentAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
-import com.edara.edara.model.entity.Member;
-import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.mapper.CurrentAttendanceMapper;
 import com.edara.edara.repository.CurrentAttendanceRepo;
 import com.edara.edara.service.CurrentAttendanceService;
@@ -15,7 +13,6 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -49,26 +46,21 @@ public class CurrentCurrentAttendanceServiceImpl implements CurrentAttendanceSer
     }
 
     @Override
-    public CurrentAttendance recordCurrentAttendance(Member member, Project project, DailyAttendance dailyAttendance) {
+    public CurrentAttendance recordCurrentAttendance( DailyAttendance dailyAttendance) {
         CurrentAttendance currentAttendance = create();
 
-        currentAttendance.setMember(member);
-        currentAttendance.setProject(project);
         currentAttendance.setDailyAttendance(dailyAttendance);
-
-        member.getCurrentAttendances().add(currentAttendance);
-        project.getCurrentAttendances().add(currentAttendance);
         dailyAttendance.getCurrentAttendances().add(currentAttendance);
 
-        return save(currentAttendance);
+        return currentAttendance;
     }
 
     @SneakyThrows
     private CurrentAttendance update(Long attendanceId, CurrentAttendance newCurrentAttendance) {
         Optional<CurrentAttendance> existedAttendance = getEntityById(attendanceId);
         if(existedAttendance.isPresent()) {
-            // Copy properties from newCurrentAttendance to existedAttendance, excluding the "id", "startTime", "member", "project"
-            nonNullBeanUtils.copyProperties(newCurrentAttendance, existedAttendance, "id", "startTime", "member", "project");
+            // Copy properties from newCurrentAttendance to existedAttendance, excluding the "id", "startTime"
+            nonNullBeanUtils.copyProperties(newCurrentAttendance, existedAttendance, "id", "startTime");
         }
         return currentAttendanceRepo.save(existedAttendance.get());
     }
@@ -91,14 +83,8 @@ public class CurrentCurrentAttendanceServiceImpl implements CurrentAttendanceSer
     }
 
     @Override
-    public Optional<CurrentAttendance> getEntityByMemberIdAndProjectIdAndEndTimeIsNull(Long memberId, Long projectId) {
-        Optional<CurrentAttendance> attendance = currentAttendanceRepo.findByMemberIdAndProjectIdAndEndTimeIsNull(memberId, projectId);
-        return attendance;
-    }
-
-    @Override
-    public List<CurrentAttendance> getUnAggregatedAttendancesByMemberAndProjectOnDay(Long memberId, Long projectId, LocalDateTime day) {
-        return currentAttendanceRepo.findUnAggregatedAttendancesByMemberAndProjectOnDay(memberId, projectId, day);
+    public Optional<CurrentAttendance> getOnGoingAttendanceByMemberAndProject(Long memberId, Long projectId) {
+        return currentAttendanceRepo.findByDailyAttendanceMemberIdAndDailyAttendanceProjectIdAndEndTimeIsNull(memberId, projectId);
     }
 
 

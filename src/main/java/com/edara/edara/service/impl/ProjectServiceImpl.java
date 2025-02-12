@@ -1,7 +1,10 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.exception.ConflictException;
-import com.edara.edara.model.dto.*;
+import com.edara.edara.model.dto.ProjectRequest;
+import com.edara.edara.model.dto.ProjectResponse;
+import com.edara.edara.model.dto.TitleRequest;
+import com.edara.edara.model.dto.TitleResponse;
 import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Title;
@@ -21,12 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -44,8 +45,8 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Transactional
-    public void aggregateDailyAttendance(Member member, Project project) {
-        dailyAttendanceService.aggregateDailyMemberAttendancesOfProject(member, project);
+    private void aggregateDailyAttendance(Long memberId, Long projectId) {
+        dailyAttendanceService.aggregateDailyMemberAttendancesOfProject(memberId, projectId);
     }
 
     //@Scheduled(cron = "0 * * * * ?") // Runs every minute
@@ -61,7 +62,7 @@ public class ProjectServiceImpl implements ProjectService {
                 if (!members.isEmpty()) {
                     // Perform aggregation
                     members.forEach(member -> {
-                        aggregateDailyAttendance(member, project);
+                        aggregateDailyAttendance(member.getId(), project.getId());
                     });
                 }
 
@@ -224,80 +225,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .toList();
     }
 
-
-    private void throwExceptionIfUserNotInvolvedInThisProject(String userCode, Long projectId) {
-
-        if (!memberService.getEntityByUserCodeAndProjectId(userCode, projectId).isPresent()) {
-            throw new ConflictException("User with code = " + userCode + " not involved in this project.");
-        }
-    }
-    @Override
-    public CurrentAttendanceResponse recordMemberAttendance(String userCode, Long projectId) {
-
-        Project project = getById(projectId);
-        User user = userService.getByCode(userCode);
-        Optional<Member> member = memberService.getEntityByUserIdAndProjectId(user.getId(), projectId);
-        throwExceptionIfUserNotInvolvedInThisProject(userCode, projectId);
-
-        return currentAttendanceService.toResponse(dailyAttendanceService.recordAttendance(member.get(), project));
-    }
-    public CurrentAttendanceResponse endMemberAttendance(String userCode, Long projectId) {
-        Project project = getById(projectId);
-        User user = userService.getByCode(userCode);
-        Optional<Member> member = memberService.getEntityByUserIdAndProjectId(user.getId(), projectId);
-
-        throwExceptionIfUserNotInvolvedInThisProject(userCode, projectId);
-
-        return currentAttendanceService.toResponse(dailyAttendanceService.endAttendance(member.get(),project));
-    }
-    @Override
-    public List<DailyAttendanceResponse> getAllDailyAttendancesByProjectIdAndUserCode(Long projectId, String userCode, Integer year, Integer month)  {
-        getById(projectId);
-        userService.getByCode(userCode);
-        Member member = memberService.getByUserCodeAndProjectId(userCode, projectId);
-        return dailyAttendanceService.getAllByProjectIdAndMemberId(projectId, member.getId(), year, month)
-                .stream()
-                .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
-                .collect(Collectors.toList()); // Collect the stream into a List
-    }
-    @Override
-    public List<DailyAttendanceResponse> getAllDailyAttendancesByProjectId(Long projectId, LocalDateTime date){
-        getById(projectId);
-        return dailyAttendanceService.getAllByProjectIdAndIsAggregatedTrue(projectId, date)
-                .stream()
-                .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
-                .collect(Collectors.toList()); // Collect the stream into a List
-    }
-    @Override
-    public List<DailyAttendanceResponse> getAllCurrentAttendancesByProjectId(Long projectId){
-        getById(projectId);
-        return dailyAttendanceService.getAllCurrentAttendancesByProjectId(projectId).stream()
-                .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
-                .collect(Collectors.toList()); // Collect the stream into a List
-    }
-
-    @Override
-    public List<DailyAttendanceResponse> getAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode) {
-
-        getById(projectId);
-        userService.getByCode(userCode);
-        Member member = memberService.getByUserCodeAndProjectId(userCode, projectId);
-
-        return dailyAttendanceService.getAllAbsencesByProjectIdAndMemberId(projectId, member.getId())
-                .stream()
-                .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
-                .collect(Collectors.toList()); // Collect the stream into a List
-    }
-
-    @Override
-    public  List<DailyAttendanceResponse> getAllAbsencesByProjectId(Long projectId, LocalDate date) {
-
-        getById(projectId);
-        return dailyAttendanceService.getAllAbsencesByProjectId(projectId, date)
-                .stream()
-                .map(dailyAttendanceService::toResponse) // Method reference for cleaner code
-                .collect(Collectors.toList()); // Collect the stream into a List
-    }
 
 
     private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Project project) {

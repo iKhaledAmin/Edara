@@ -73,11 +73,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/delete-member/{userCode}/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-member/{memberId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-members/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/record-attendance/{userCode}/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/end-attendance/{userCode}/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-daily-attendances/{projectId}/{userCode}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-daily-attendances/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-daily-current-attendances/{projectId}").hasAuthority("USER")
+
                         .requestMatchers("/projects/addNormalMember-task/{projectId}").hasAuthority("USER")
                         .requestMatchers("/projects/delete-task/{taskId}").hasAuthority("USER")
                         .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")
@@ -97,7 +93,13 @@ public class SecurityConfiguration {
                         .requestMatchers("/members/get/{memberId}").hasAuthority("USER")
                         .requestMatchers("/members/get-all-of-project/{projectId}").hasAuthority("USER")
 
-
+                        .requestMatchers("/attendance/record-attendance/{userCode}/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/attendance/end-attendance/{userCode}/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/attendance/get-daily-attendances/{projectId}/{userCode}").hasAuthority("USER")
+                        .requestMatchers("/attendance/get-daily-attendances/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/attendance/get-active-attendances/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/attendance/get-absences/{projectId}/{userCode}").hasAuthority("USER")
+                        .requestMatchers("/attendance/get-absences/{projectId}").hasAuthority("USER")
 
                         .requestMatchers("/tasks/add").hasAuthority("USER")
                         .requestMatchers("/tasks/update/{taskId}").hasAuthority("USER")

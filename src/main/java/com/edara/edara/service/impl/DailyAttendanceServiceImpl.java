@@ -1,6 +1,7 @@
 package com.edara.edara.service.impl;
 
 import com.edara.edara.exception.ConflictException;
+import com.edara.edara.model.dto.CurrentAttendanceResponse;
 import com.edara.edara.model.dto.DailyAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
@@ -8,11 +9,8 @@ import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.mapper.DailyAttendanceMapper;
 import com.edara.edara.repository.DailyAttendanceRepo;
-import com.edara.edara.service.CurrentAttendanceService;
-import com.edara.edara.service.DailyAttendanceService;
+import com.edara.edara.service.*;
 import com.edara.edara.utils.Utilts;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -30,9 +29,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     private final DailyAttendanceRepo dailyAttendanceRepo;
     private final DailyAttendanceMapper dailyAttendanceMapper;
     private final CurrentAttendanceService currentAttendanceService;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final ServiceLocator serviceLocator;
 
     public DailyAttendance create(LocalDateTime startTime) {
         DailyAttendance dailyAttendance = new DailyAttendance();
@@ -47,68 +44,67 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
         return dailyAttendanceRepo.save(dailyAttendance);
     }
 
+    public DailyAttendanceResponse toResponse(DailyAttendance dailyAttendance){
+        return dailyAttendanceMapper.toResponse(dailyAttendance);
+    }
+
     @Transactional
     @Override
     public DailyAttendance add(Member member, Project project, LocalDateTime startTime) {
-        /*
-         * When this method is called, the `member` and `project` entities are likely
-         * in a **detached state** because they were retrieved in a separate transaction
-         * (e.g., from a scheduled job or a different service layer method).
-         *
-         * In JPA, detached entities cannot be directly associated with other managed entities
-         * or persisted to the database. Attempting to do so may result in an
-         * `org.hibernate.PersistentObjectException: detached entity passed to persist` error.
-         *
-         * To resolve this, we use `entityManager.merge(entity)`, which:
-         *  1. Checks if the entity already exists in the persistence context.
-         *  2. If it does, returns the managed instance.
-         *  3. If it doesn’t, fetches the entity from the database and returns a new managed instance.
-         *
-         * By merging `member` and `project`, we ensure they are **reattached** before assigning them
-         * to `dailyAttendance`. This allows Hibernate to correctly track changes and persist them
-         * without errors.
-         */
-        Member managedMember = entityManager.merge(member);
-        Project managedProject = entityManager.merge(project);
-
         DailyAttendance dailyAttendance = create(startTime);
-        dailyAttendance.setMember(managedMember);
-        dailyAttendance.setProject(managedProject);
+        dailyAttendance.setMember(member);
+        dailyAttendance.setProject(project);
         return save(dailyAttendance);
     }
 
+    private void throwExceptionIfMemberAlreadyRecorded(Long memberId, Long projectId) {
 
-    @Transactional
-    public CurrentAttendance recordAttendance(Member member, Project project) {
-
-        // Check if there's an ongoing attendance record for the member in the project
-        currentAttendanceService.getEntityByMemberIdAndProjectIdAndEndTimeIsNull(member.getId(),project.getId()).ifPresent(
+        currentAttendanceService.getOnGoingAttendanceByMemberAndProject(memberId,projectId).ifPresent(
                 attendance -> {
                     throw new ConflictException("Member already recorded.");
                 }
         );
 
+    }
+    @Override
+    @Transactional
+    public CurrentAttendanceResponse recordAttendance(String userCode, Long projectId) {
+
+        serviceLocator.getService(UserService.class).getByCode(userCode);
+        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
+        Member member = serviceLocator.getService(MemberService.class).getByUserCodeAndProjectId(userCode, projectId);
+
+        // Check if there's an ongoing attendance record for the member in the project
+        throwExceptionIfMemberAlreadyRecorded(member.getId(), project.getId());
+
         // Retrieve daily attendance if exists, otherwise create a new one
-        DailyAttendance dailyAttendance = getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(member.getId(), project.getId(), LocalDate.now())
+        DailyAttendance onGoingDailyAttendance = getOnGoingDailyAttendanceByUserCodeAndProjectId(userCode, projectId)
                 .orElseGet(() -> add(member, project, LocalDateTime.now()));
 
+
         // Record new attendance
-        CurrentAttendance currentAttendance = currentAttendanceService.recordCurrentAttendance(member, project, dailyAttendance);
+        CurrentAttendance currentAttendance = currentAttendanceService.recordCurrentAttendance(onGoingDailyAttendance);
 
-        dailyAttendance.getCurrentAttendances().add(currentAttendance);
-        save(dailyAttendance);
+        onGoingDailyAttendance.getCurrentAttendances().add(currentAttendance);
+        onGoingDailyAttendance.setEndTime(null);
+        save(onGoingDailyAttendance);
 
-        return currentAttendance;
+        return currentAttendanceService.toResponse(currentAttendance);
     }
 
     @Transactional
-    public CurrentAttendance endAttendance(Member member, Project project) {
+    public CurrentAttendanceResponse endAttendance(String userCode, Long projectId) {
+
+        serviceLocator.getService(UserService.class).getByCode(userCode);
+        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
+        Member member = serviceLocator.getService(MemberService.class).getByUserCodeAndProjectId(userCode, projectId);
+
 
         // Retrieve the active attendance record for the member in the project
         CurrentAttendance currentAttendance = currentAttendanceService
-                .getEntityByMemberIdAndProjectIdAndEndTimeIsNull(member.getId(), project.getId())
+                .getOnGoingAttendanceByMemberAndProject(member.getId(), project.getId())
                 .orElseThrow(() -> new ConflictException(
-                        "There is no  attendance recorded for member with code = " + member.getUser().getUserCode())
+                        "There is no  attendance recorded for member with code = " + userCode)
                 );
         DailyAttendance dailyAttendance = currentAttendance.getDailyAttendance();
         currentAttendance = currentAttendanceService.endCurrentAttendance(currentAttendance);
@@ -118,18 +114,26 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
         dailyAttendance.getCurrentAttendances().add(currentAttendance);
         save(dailyAttendance);
 
-         return currentAttendance;
+         return currentAttendanceService.toResponse(currentAttendance);
 
     }
 
-    public DailyAttendanceResponse toResponse(DailyAttendance dailyAttendance){
-        return dailyAttendanceMapper.toResponse(dailyAttendance);
+    @Override
+    public Optional<DailyAttendance> getOnGoingDailyAttendanceByUserCodeAndProjectId(String userCode, Long projectId) {
+
+        serviceLocator.getService(UserService.class).getByCode(userCode);
+        serviceLocator.getService(ProjectService.class).getById(projectId);
+        Member member = serviceLocator.getService(MemberService.class).getByUserCodeAndProjectId(userCode, projectId);
+
+        return dailyAttendanceRepo.findByMember_IdAndProject_IdAndDateAndIsAggregatedIsFalse(member.getId(), projectId, LocalDate.now());
     }
-
-
-    public Optional<DailyAttendance> getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(Long memberId, Long projectId, LocalDate date) {
+    public Optional<DailyAttendance> getUnAggregatedByMemberIdAndProjectIdAndDate(Long memberId, Long projectId, LocalDate date) {
         return dailyAttendanceRepo.findByMemberIdAndProjectIdAndDateIsAggregatedFalse(memberId, projectId, date);
     }
+
+
+
+
     private List<DailyAttendance> getAllByProjectIdAndMemberIdAndIsAggregatedTure(Long projectId,Long memberId) {
         return dailyAttendanceRepo.findAllByProjectIdAndMemberIdAndIsAggregatedTrue(projectId,memberId);
     }
@@ -139,18 +143,32 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     private List<DailyAttendance> getAllByProjectIdAndMemberIdInSpecificMonth(Long projectId, Long memberId, Integer year,Integer month) {
         return dailyAttendanceRepo.findAllByProjectIdAndMemberIdInSpecificMonth(projectId, memberId, year,month);
     }
-    public List<DailyAttendance> getAllByProjectIdAndMemberId(Long projectId,Long memberId, Integer year,Integer month) {
+    public List<DailyAttendance> getAllByProjectIdAndMemberId(Long projectId,String userCode, Integer year,Integer month) {
+        serviceLocator.getService(ProjectService.class).getById(projectId);
+        serviceLocator.getService(UserService.class).getByCode(userCode);
+        Member member = serviceLocator.getService(MemberService.class).getByUserCodeAndProjectId(userCode, projectId);
+
         // Validate inputs
         if (month != null && year == null) {
             throw new ConflictException("Month cannot be specified without a year.");
         }
         if(month != null && year != null)
-            return getAllByProjectIdAndMemberIdInSpecificMonth(projectId,memberId,year,month);
+            return getAllByProjectIdAndMemberIdInSpecificMonth(projectId,member.getId(),year,month);
         else if (month != null)
-            return getAllByProjectIdAndMemberIdInSpecificYear(projectId,memberId,year);
+            return getAllByProjectIdAndMemberIdInSpecificYear(projectId,member.getId(),year);
         else
-            return getAllByProjectIdAndMemberIdAndIsAggregatedTure(projectId,memberId);
+            return getAllByProjectIdAndMemberIdAndIsAggregatedTure(projectId,member.getId());
     }
+    public List<DailyAttendanceResponse> getResponseAllByProjectIdAndUserCode(Long projectId, String userCode, Integer year, Integer month){
+        return getAllByProjectIdAndMemberId(projectId, userCode, year, month)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList()); // Collect the stream into a List
+
+    }
+
+
+
 
     private List<DailyAttendance> getAllByProjectIdAndIsAggregatedTrue(Long projectId) {
         return dailyAttendanceRepo.findAllByProjectIdAndIsAggregatedTrue(projectId);
@@ -158,41 +176,73 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     private List<DailyAttendance> getAllByProjectIdAndDateAndIsAggregatedTrue(Long projectId, LocalDateTime date) {
         return dailyAttendanceRepo.findAllByProjectIdAndDateAndIsAggregatedTrue(projectId, date);
     }
-    public List<DailyAttendance> getAllByProjectIdAndIsAggregatedTrue(Long projectId, LocalDateTime date) {
+    public List<DailyAttendance> getAllByProjectId(Long projectId, LocalDateTime date) {
+        serviceLocator.getService(ProjectService.class).getById(projectId);
         if (date != null)
             return getAllByProjectIdAndDateAndIsAggregatedTrue(projectId, date);
         return getAllByProjectIdAndIsAggregatedTrue(projectId);
     }
+    public List<DailyAttendanceResponse> getResponseAllByProjectId(Long projectId, LocalDateTime date){
+        return getAllByProjectId(projectId, date)
+                .stream()
+                .map(this::toResponse) // Method reference for cleaner code
+                .collect(Collectors.toList()); // Collect the stream into a List
+    }
+
+
 
     @Override
-    public List<DailyAttendance> getAllCurrentAttendancesByProjectId(Long projectId) {
+    public List<DailyAttendance> getAllActiveAttendancesByProjectId(Long projectId) {
+        serviceLocator.getService(ProjectService.class).getById(projectId);
         return dailyAttendanceRepo.findAllByProjectIdAndEndTimeIsNullAndIsAggregatedFalse(projectId);
     }
-
     @Override
-    public DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId) {
-        return dailyAttendanceRepo.findByMemberIdAndProjectIdAndEndTimeIsNullAndIsAggregatedFalse(memberId, projectId);
+    public List<DailyAttendanceResponse> getResponseAllActiveAttendancesByProjectId(Long projectId){
+        return getAllActiveAttendancesByProjectId(projectId)
+                .stream()
+                .map(this::toResponse) // Method reference for cleaner code
+                .collect(Collectors.toList()); // Collect the stream into a List
     }
 
+
+
     @Override
-    public List<DailyAttendance> getAllAbsencesByProjectIdAndMemberId(Long projectId, Long memberId) {
-        return dailyAttendanceRepo.findAllByProjectIdAndMemberIdAndStartTimeNullAndEndTimeIsNull(projectId,memberId);
+    public List<DailyAttendance> getAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode) {
+        serviceLocator.getService(ProjectService.class).getById(projectId);
+        serviceLocator.getService(UserService.class).getByCode(userCode);
+        Member member = serviceLocator.getService(MemberService.class).getByUserCodeAndProjectId(userCode, projectId);
+        return dailyAttendanceRepo.findAllByProjectIdAndMemberIdAndStartTimeNullAndEndTimeIsNull(projectId,member.getId());
 
     }
-
+    @Override
+    public List<DailyAttendanceResponse> getResponseAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode) {
+        return getAllAbsencesByProjectIdAndUserCode(projectId, userCode)
+                .stream()
+                .map(this::toResponse) // Method reference for cleaner code
+                .collect(Collectors.toList()); // Collect the stream into a List
+    }
     private List<DailyAttendance> getAllAbsencesByProjectIdAndDate(Long projectId, LocalDate date){
+        serviceLocator.getService(ProjectService.class).getById(projectId);
         return dailyAttendanceRepo.findAllByProjectIdAndDateAndStartTimeNullAndEndTimeIsNull(projectId,date);
     }
     private List<DailyAttendance> getAllAbsencesByProjectId(Long projectId){
+        serviceLocator.getService(ProjectService.class).getById(projectId);
         return dailyAttendanceRepo.findAllByProjectIdAndStartTimeNullAndEndTimeIsNull(projectId);
     }
-
     @Override
     public List<DailyAttendance> getAllAbsencesByProjectId(Long projectId, LocalDate date) {
         if (date != null)
             return getAllAbsencesByProjectIdAndDate(projectId,date);
         return getAllAbsencesByProjectId(projectId);
     }
+    @Override
+    public List<DailyAttendanceResponse> getResponseAllAbsencesByProjectId(Long projectId, LocalDate date){
+        return getAllAbsencesByProjectId(projectId, date)
+                .stream()
+                .map(this::toResponse) // Method reference for cleaner code
+                .collect(Collectors.toList()); // Collect the stream into a List
+    }
+
 
 
 
@@ -225,7 +275,7 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
      * <p>
      * This method sorts the list of {@link CurrentAttendance} objects by their end time (with null values last).
      * It then checks the last record in the sorted list. If the end time of the last record is null,
-     * the method will finalize the attendance by calling {@link #endAttendance(Member, Project)}.
+     * the method will finalize the attendance by calling {@link #endAttendance(String userCode, Long projectId)}.
      * Finally, it returns the end time of the last attendance, either from the existing record or the finalized one.
      * </p>
      *
@@ -249,14 +299,15 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
         // Get the last attendance record
         CurrentAttendance lastAttendance = currentAttendances.get(currentAttendances.size() - 1);
+        LocalDateTime lastEndTime = lastAttendance.getEndTime();
 
         // If the last attendance has no end time, end the attendance first
-        if (lastAttendance.getEndTime() == null) {
-            lastAttendance = endAttendance(lastAttendance.getMember(), lastAttendance.getProject());
+        if (lastEndTime == null) {
+            lastEndTime = endAttendance(lastAttendance.getDailyAttendance().getMember().getUser().getUserCode(), lastAttendance.getDailyAttendance().getProject().getId()).getEndTime();
         }
 
         // Return the last attendance's end time
-        return lastAttendance.getEndTime();
+        return lastEndTime;
     }
 
     /**
@@ -305,28 +356,13 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
     }
 
 
-//    @Transactional
-//    public void aggregateDailyMemberAttendancesOfProject(Member member, Project project) {
-//        System.out.println("Aggregating daily attendances for member: " + member.getId() + " in project: " + project.getId());
-//        DailyAttendance dailyAttendance = getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(
-//                member.getId(), project.getId(), LocalDate.now()
-//        ).orElseGet(() -> addNormalMember(member, project).setIsAggregated(true));
-//        System.out.println("Here1");
-//        if (!dailyAttendance.getCurrentAttendances().isEmpty()) {
-//            System.out.println("Here2");
-//            aggregate(dailyAttendance);
-//        }
-//    }
-
-
     @Transactional
-    public void aggregateDailyMemberAttendancesOfProject(Member member, Project project) {
-        //System.out.println("Aggregating daily attendances for member: " + member.getId() + " in project: " + project.getId());
+    public void aggregateDailyMemberAttendancesOfProject(Long memberId, Long projectId) {
+        Member member = serviceLocator.getService(MemberService.class).getById(memberId);
+        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
 
         // Try to fetch an existing DailyAttendance
-        Optional<DailyAttendance> OptionalDailyAttendance = getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(
-                member.getId(), project.getId(), LocalDate.now()
-        );
+        Optional<DailyAttendance> OptionalDailyAttendance = getOnGoingDailyAttendanceByUserCodeAndProjectId(member.getUser().getUserCode(), project.getId());
 
         DailyAttendance dailyAttendance = OptionalDailyAttendance.orElseGet(() -> {
             // If not found, create a new DailyAttendance and set isAggregated to true

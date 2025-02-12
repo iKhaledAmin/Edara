@@ -16,8 +16,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CurrentAttendanceMapper {
 
-    @Mapping(target = "userName", expression = "java(concatenateUserName(entity.getMember().getUser().getFirstName(), entity.getMember().getUser().getLastName()))")
-    @Mapping(target = "userCode", source = "entity.member.user.userCode")
+    @Mapping(target = "userName", expression = "java(concatenateUserName(entity.getDailyAttendance().getMember().getUser().getFirstName(), entity.getDailyAttendance().getMember().getUser().getLastName()))")//java(concatenateUserName(entity.getMember().getUser().getFirstName(), entity.getMember().getUser().getLastName()))")
+    @Mapping(target = "userCode", source = "entity.dailyAttendance.member.user.userCode")
     @Mapping(target = "period", expression = "java(formatDuration(entity.getPeriod()))")
     CurrentAttendanceResponse toResponse(CurrentAttendance entity);
 

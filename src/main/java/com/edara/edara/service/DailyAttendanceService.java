@@ -1,6 +1,7 @@
 package com.edara.edara.service;
 
 import com.edara.edara.exception.ConflictException;
+import com.edara.edara.model.dto.CurrentAttendanceResponse;
 import com.edara.edara.model.dto.DailyAttendanceResponse;
 import com.edara.edara.model.entity.CurrentAttendance;
 import com.edara.edara.model.entity.DailyAttendance;
@@ -28,17 +29,17 @@ public interface DailyAttendanceService {
       *   <li>Retrieves the existing {@link DailyAttendance} for the member and project on the current day, or creates a new one if none exists.</li>
       *   <li>Creates and records a new {@link CurrentAttendance} for the member in the project.</li>
       *   <li>Associates the new attendance with the corresponding {@link DailyAttendance} and updates it in the database.</li>
-      *   <li>Returns the newly created {@link CurrentAttendance} object.</li>
+      *   <li>Returns the newly created {@link CurrentAttendanceResponse} object.</li>
       * </ol>
       *
       * This method is transactional, ensuring that all database operations are executed as part of a single transaction.
       *
-      * @param member the {@link Member} of the member whose attendance is being recorded
-      * @param project the {@link Project} in which the attendance is being recorded
-      * @return the newly created {@link CurrentAttendance} object
-      * @throws ConflictException if the member already has an active attendance session in the project
+      * @param userCode the unique identifier of the member whose attendance is being recorded
+      * @param projectId the unique identifier of the project in which the attendance is being recorded
+      * @return the newly created {@link CurrentAttendanceResponse} object
+      * @throws ConflictException if the member already has an active attendance session in the project Or if user is not a member of the project
       */
-     CurrentAttendance recordAttendance(Member member, Project project);
+     CurrentAttendanceResponse recordAttendance(String userCode, Long projectId);
 
      /**
       * Ends the attendance session for a member in a specific project by retrieving the active
@@ -61,7 +62,7 @@ public interface DailyAttendanceService {
       * @return the updated {@link CurrentAttendance} object
       * @throws ConflictException if no active attendance record is found for the member in the project
       */
-     CurrentAttendance endAttendance(Member member, Project project);
+     CurrentAttendanceResponse endAttendance(String userCode, Long projectId);
 
 
      /**
@@ -89,7 +90,7 @@ public interface DailyAttendanceService {
       * @param date      The specific date for which the attendance record is being queried. Must not be null.
       * @return An {@link Optional} containing the {@link DailyAttendance} record if found; otherwise, an empty {@link Optional}.
       */
-     Optional<DailyAttendance> getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse(Long memberId, Long projectId, LocalDate date);
+     Optional<DailyAttendance> getUnAggregatedByMemberIdAndProjectIdAndDate(Long memberId, Long projectId, LocalDate date);
 
 
      /**
@@ -117,7 +118,8 @@ public interface DailyAttendanceService {
       * @return a list of {@link DailyAttendance} records matching the specified filters.
       * @throws ConflictException if {@code month} is provided without {@code year}.
       */
-     List<DailyAttendance> getAllByProjectIdAndMemberId(Long projectId,Long memberId, Integer year,Integer month);
+     List<DailyAttendance> getAllByProjectIdAndMemberId(Long projectId,String userCode, Integer year,Integer month);
+     List<DailyAttendanceResponse> getResponseAllByProjectIdAndUserCode(Long projectId, String userCode, Integer year, Integer month);
 
      /**
       * Retrieves a list of aggregated daily attendance records for a specific project.
@@ -135,7 +137,8 @@ public interface DailyAttendanceService {
       * @param date (optional) the specific date to filter the records by, can be null
       * @return a list of {@link DailyAttendance} objects that match the specified project ID and aggregated status
       */
-     List<DailyAttendance> getAllByProjectIdAndIsAggregatedTrue(Long projectId, LocalDateTime date);
+     List<DailyAttendance> getAllByProjectId(Long projectId, LocalDateTime date);
+     List<DailyAttendanceResponse> getResponseAllByProjectId(Long projectId, LocalDateTime date);
 
      /**
       * Retrieves a list of {@link DailyAttendance} records representing all ongoing (currently working on a project) attendances
@@ -157,9 +160,10 @@ public interface DailyAttendanceService {
       * @return A list of {@link DailyAttendance} instances representing ongoing attendance records for the specified project.
       *         Returns an empty list if no such records exist.
       */
-     List<DailyAttendance> getAllCurrentAttendancesByProjectId(Long projectId);
+     List<DailyAttendance> getAllActiveAttendancesByProjectId(Long projectId);
+     List<DailyAttendanceResponse> getResponseAllActiveAttendancesByProjectId(Long projectId);
 
-     DailyAttendance getCurrentAttendanceByMemberIdAndProjectId(Long memberId, Long projectId);
+     Optional<DailyAttendance> getOnGoingDailyAttendanceByUserCodeAndProjectId(String userCode, Long projectId);
 
      /**
       * Retrieves a list of {@link DailyAttendance} records representing all absences for a given member
@@ -173,21 +177,17 @@ public interface DailyAttendanceService {
       *     <li>Both {@code startTime} and {@code endTime} are null, signifying an absence.</li>
       * </ul>
       *
-      * <p><strong>Important:</strong> This method does not validate whether the provided
-      * {@code projectId} and {@code memberId} actually belong to the same project-member
-      * relationship. It assumes the correctness of the input parameters, so the caller must
-      * ensure that the {@code memberId} corresponds to a valid member of the specified
-      * {@code projectId} before invoking this method.</p>
       *
       * <p>Use this method to track attendance compliance for a specific member within a project.</p>
       *
       * @param projectId The unique identifier of the project for which the absence records are being retrieved.
       *                  Must not be null.
-      * @param memberId  The unique identifier of the member whose absences are being queried. Must not be null.
+      * @param userCode  The unique identifier of the member whose absences are being queried. Must not be null.
       * @return A list of {@link DailyAttendance} instances where the member was absent (i.e., did not register
       *         their attendance). Returns an empty list if no such records exist.
       */
-     List<DailyAttendance> getAllAbsencesByProjectIdAndMemberId(Long projectId, Long memberId);
+     List<DailyAttendance> getAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode);
+     List<DailyAttendanceResponse> getResponseAllAbsencesByProjectIdAndUserCode(Long projectId, String userCode);
 
 
      /**
@@ -212,14 +212,15 @@ public interface DailyAttendanceService {
       *         Returns an empty list if no such records exist.
       */
      List<DailyAttendance> getAllAbsencesByProjectId(Long projectId, LocalDate date);
+     List<DailyAttendanceResponse> getResponseAllAbsencesByProjectId(Long projectId, LocalDate date);
 
 
      /**
       * Aggregates the daily attendance records for a given member and project.
       * <p>
       * This method first attempts to retrieve the existing {@link DailyAttendance} record for the specified
-      * {@link Member} and {@link Project} on the current day using the {@link #getEntityByMemberIdAndProjectIdAndDateAndIsAggregatedFalse} method.
-      * If no such record exists, a new {@link DailyAttendance} entry is created using the {@link #add(Member, Project)} method.
+      * {@link Member} and {@link Project} on the current day using the {@link #getUnAggregatedByMemberIdAndProjectIdAndDate} method.
+      * If no such record exists, a new {@link DailyAttendance} entry is created
       * If the {@link DailyAttendance} is newly created, it will automatically be marked as aggregated.
       * </p>
       * <p>
@@ -235,10 +236,10 @@ public interface DailyAttendanceService {
       * aggregated only if current attendance records are present.
       * </p>
       *
-      * @param member The {@link Member} of the member whose daily attendance is to be aggregated.
-      * @param project The {@link Project} to which the member's attendance is associated.
+      * @param memberId The unique identifier of the member whose daily attendance is to be aggregated.
+      * @param projectId The unique identifier of the project to which the member's attendance is associated.
       */
-     void aggregateDailyMemberAttendancesOfProject(Member member, Project project);
+     void aggregateDailyMemberAttendancesOfProject(Long memberId, Long projectId);
 
 
 }

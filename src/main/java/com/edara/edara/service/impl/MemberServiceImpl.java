@@ -208,10 +208,11 @@ public class MemberServiceImpl implements MemberService {
 
         throwExceptionIfMemberStillWorkingOnTask((member));
 
-        DailyAttendance dailyAttendance =
-                serviceLocator.getService(DailyAttendanceService.class).getCurrentAttendanceByMemberIdAndProjectId( member.getId(), projectId);
-        if (dailyAttendance != null) {
-            serviceLocator.getService(DailyAttendanceService.class).endAttendance(member, project);
+        // End the ongoing daily attendance
+        Optional<DailyAttendance> onGoingDailyAttendance =
+                serviceLocator.getService(DailyAttendanceService.class).getOnGoingDailyAttendanceByUserCodeAndProjectId(userCode, projectId);
+        if (onGoingDailyAttendance .isPresent()) {
+            serviceLocator.getService(DailyAttendanceService.class).endAttendance(userCode, projectId);
         }
 
         user.getMembers().remove(member);

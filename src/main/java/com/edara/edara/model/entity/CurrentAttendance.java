@@ -32,19 +32,19 @@ public class CurrentAttendance extends BaseEntity {
     @Column(name = "is_aggregated", nullable = false)
     private Boolean isAggregated = false;
 
-    @ManyToOne( fetch = FetchType.LAZY,
-            optional = false,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
-    )
-    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false,updatable = false)
-    private Member member;
-
-    @ManyToOne( fetch = FetchType.LAZY,
-            optional = false,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
-    )
-    @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false,updatable = false)
-    private Project project;
+//    @ManyToOne( fetch = FetchType.LAZY,
+//            optional = false,
+//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+//    )
+//    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false,updatable = false)
+//    private Member member;
+//
+//    @ManyToOne( fetch = FetchType.LAZY,
+//            optional = false,
+//            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+//    )
+//    @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false,updatable = false)
+//    private Project project;
 
     @ManyToOne( fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
