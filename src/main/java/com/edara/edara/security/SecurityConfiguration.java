@@ -78,14 +78,16 @@ public class SecurityConfiguration {
                         .requestMatchers("/projects/delete-task/{taskId}").hasAuthority("USER")
                         .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")
                         .requestMatchers("/projects/get-all-user-tasks/{userId}").hasAuthority("USER")
-                        .requestMatchers("/projects/addNormalMember-title/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/delete-title/{titleId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-project-titles/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/titles/get-by-id/{titleId}").hasAuthority("USER")
-                        .requestMatchers("/titles/update/{titleId}").hasAuthority("USER")
+
 
 
                         .requestMatchers("/auth/login", "/users/register").permitAll()
+
+                        .requestMatchers("/titles/add/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/titles/update/{titleId}").hasAuthority("USER")
+                        .requestMatchers("/titles/delete/{titleId}").hasAuthority("USER")
+                        .requestMatchers("/titles/get/{titleId}").hasAuthority("USER")
+                        .requestMatchers("/titles/get-all-of-project/{projectId}").hasAuthority("USER")
 
                         .requestMatchers("/members/add").hasAuthority("USER")
                         .requestMatchers("/members/update/{memberId}").hasAuthority("USER")

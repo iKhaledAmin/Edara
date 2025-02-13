@@ -248,4 +248,9 @@ public class MemberServiceImpl implements MemberService {
                 .map(memberMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean isExistsByTitleIdAndProjectId(Long titleId, Long projectId) {
+        return memberRepo.existsByTitleIdAndProjectId(titleId, projectId);
+    }
 }

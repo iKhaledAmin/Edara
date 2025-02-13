@@ -65,11 +65,6 @@ public class Project extends BaseEntity {
     )
     private List<Title> titles = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "project",
-//            fetch = FetchType.LAZY,
-//            cascade = CascadeType.ALL //Deletes all currentAttendances entities when the Project is deleted.
-//    )
-//    private List<CurrentAttendance> currentAttendances = new ArrayList<>();
 
     @OneToMany(mappedBy = "project",
             fetch = FetchType.LAZY,

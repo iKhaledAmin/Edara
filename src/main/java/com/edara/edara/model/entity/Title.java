@@ -25,7 +25,8 @@ public class Title extends BaseEntity{
     private String description;
 
 
-    @ManyToOne( fetch = FetchType.LAZY,
+    @ManyToOne(
+            fetch = FetchType.LAZY,
             optional = false,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
     )

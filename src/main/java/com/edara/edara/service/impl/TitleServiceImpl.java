@@ -1,15 +1,20 @@
 package com.edara.edara.service.impl;
 
+import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.TitleRequest;
 import com.edara.edara.model.dto.TitleResponse;
 import com.edara.edara.model.entity.Project;
 import com.edara.edara.model.entity.Title;
 import com.edara.edara.model.mapper.TitleMapper;
 import com.edara.edara.repository.TitleRepo;
+import com.edara.edara.service.MemberService;
+import com.edara.edara.service.ProjectService;
+import com.edara.edara.service.ServiceLocator;
 import com.edara.edara.service.TitleService;
 import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,6 +25,7 @@ import java.util.Optional;
 public class TitleServiceImpl implements TitleService{
     private final TitleRepo titleRepo;
     private final TitleMapper titleMapper;
+    private final ServiceLocator serviceLocator;
     private final NonNullBeanUtils nonNullBeanUtils;
 
     @Override
@@ -32,45 +38,82 @@ public class TitleServiceImpl implements TitleService{
         return titleMapper.toEntity(titleRequest);
     }
 
-    @Override
-    public Title create(TitleRequest titleRequest) {
-        Title newTitle = titleMapper.toEntity(titleRequest);
+
+    private Title create() {
+        Title newTitle = new Title();
         return newTitle;
     }
-
-    @Override
-    public Title save(Title title) {
+    private Title create(TitleRequest titleRequest) {
+        Title newTitle = toEntity(titleRequest);
+        return newTitle;
+    }
+    private Title save(Title title) {
         return titleRepo.save(title);
     }
 
+    private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Long projectId) {
+        if (titleRepo.existsByNameIgnoreCaseAndProjectId(titleName, projectId)) {
+            throw new ConflictException("Title with the same name already exists in this project.");
+        }
+    }
+
     @Override
-    public Title add(TitleRequest titleRequest, Project project) {
-        Title newTitle = create(titleRequest);
+    public Title add(Title newTitle, Long projectId) {
+        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
+        throwExceptionIfProjectIncludeTitleWithSameName(newTitle.getName(), projectId);
+
         newTitle.setProject(project);
+        project.getTitles().add(newTitle);
+
         return save(newTitle);
     }
 
     @Override
-    public Title updateEntity(Long titleId, Title newTitle) {
+    public Title add(TitleRequest titleRequest, Long projectId) {
+        Title newTitle = create(titleRequest);
+        return add(newTitle, projectId);
+    }
+
+
+    @Override
+    public Title update(Long titleId, Title newTitle) {
         Title existedTitle = getById(titleId);
 
-        // Copy properties from newTitle to existedTitle, excluding the "id", "name", "project"
-        nonNullBeanUtils.copyProperties(newTitle, existedTitle, "id","name","project");
+        throwExceptionIfProjectIncludeTitleWithSameName(newTitle.getName(), existedTitle.getProject().getId());
+
+        // Copy properties from newTitle to existedTitle, excluding the "id", "project"
+        nonNullBeanUtils.copyProperties(newTitle, existedTitle, "id","project");
 
         return save(existedTitle);
     }
 
     @Override
-    public TitleResponse update(Long titleId, TitleRequest titleRequest) {
+    public Title update(Long titleId, TitleRequest titleRequest) {
         Title newTitle = toEntity(titleRequest);
-        Title updatedTitle = updateEntity(titleId, newTitle);
-        return toResponse(updatedTitle);
+        return update(titleId, newTitle);
     }
 
+    private void throwExceptionIfTitleStillAssignedToMembers(Long titleId, Long projectId) {
+        boolean exists = serviceLocator.getService(MemberService.class)
+                .isExistsByTitleIdAndProjectId(titleId, projectId);
+
+        if (exists) {
+            throw new ConflictException("Title is still assigned to members.");
+        }
+    }
+    @Transactional
     @Override
     public void delete(Long titleId) {
-        getById(titleId);
-        titleRepo.deleteById(titleId);
+        Title title = getById(titleId);
+        Project project = title.getProject();
+        throwExceptionIfTitleStillAssignedToMembers(titleId, project.getId());
+
+        // Remove the title from the project's title list to trigger orphan removal
+        // JPA will automatically delete the title from the database
+        if (project.getTitles().contains(title))
+            project.getTitles().remove(title); // Triggers orphan removal
+
+        //titleRepo.delete(title);
     }
 
     @Override
@@ -91,8 +134,14 @@ public class TitleServiceImpl implements TitleService{
     }
 
     @Override
-    public List<TitleResponse> getAll() {
-        return titleRepo.findAll()
+    public List<Title> getAllByProjectId(Long projectId) {
+        serviceLocator.getService(ProjectService.class).getById(projectId);
+        return titleRepo.findAllByProjectId(projectId);
+    }
+
+    @Override
+    public List<TitleResponse> getResponseAllByProjectId(Long projectId) {
+        return getAllByProjectId(projectId)
                 .stream()
                 .map(this::toResponse)
                 .toList();

@@ -183,8 +183,5 @@ public interface MemberService {
     List<MemberResponse> getAllResponseByProjectId(Long projectId);
 
 
-
-
-
-
+    boolean isExistsByTitleIdAndProjectId(Long titleId, Long projectId);
 }
