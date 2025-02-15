@@ -3,8 +3,10 @@ package com.edara.edara.service.impl;
 import com.edara.edara.exception.ConflictException;
 import com.edara.edara.model.dto.ProjectRequest;
 import com.edara.edara.model.dto.ProjectResponse;
+import com.edara.edara.model.dto.TitleRequest;
 import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
+import com.edara.edara.model.entity.Title;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.MemberRole;
 import com.edara.edara.model.mapper.ProjectMapper;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,24 +34,20 @@ import java.util.Optional;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepo projectRepo;
     private final ProjectMapper projectMapper;
-    private final MemberService memberService;
-    private final UserServiceImpl userService;
-    private final TitleService titleService;
-    private final CurrentAttendanceService currentAttendanceService;
-    private final DailyAttendanceService dailyAttendanceService;
+    private final ServiceLocator serviceLocator;
     private final NonNullBeanUtils nonNullBeanUtils;
 
 
 
 
     @Transactional
-    private void aggregateDailyAttendance(Long memberId, Long projectId) {
-        dailyAttendanceService.aggregateDailyMemberAttendancesOfProject(memberId, projectId);
+    protected  void aggregateDailyAttendance(Long memberId, Long projectId) {
+        serviceLocator.getService(DailyAttendanceService.class).aggregateDailyMemberAttendancesOfProject(memberId, projectId);
     }
 
     //@Scheduled(cron = "0 * * * * ?") // Runs every minute
     @Scheduled(cron = "0 0 * * * ?") // Runs at the start of every hour
-    public void aggregateAllMemberDailyAttendancesInProject() {
+    protected void aggregateAllMemberDailyAttendancesInProject() {
         //System.out.println("Aggregating all member daily attendances in projects...");
         Integer currentHour = LocalDateTime.now().getHour();
         List<Project> projects = projectRepo.findAllByAggregationHour(currentHour);
@@ -106,88 +105,76 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toEntity(projectRequest);
     }
 
-    private void throwExceptionIfUserHasProjectWithSameName(String projectName) {
+    private Project create(){
+        Project newProject = new Project();
+        newProject.setCode(generateUniqueProjectCode());
+        newProject.setStartedDate(LocalDate.now());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getByUserName(authentication.getName());
-
-        // Check if the user is the OWNER of a project with the same name
-        boolean isOwnerOfSameNameProject = user.getMembers().stream()
-                .anyMatch(memberShip ->
-                        memberShip.getProject().getName().equalsIgnoreCase(projectName) &&
-                                memberShip.getMemberRole().equals(MemberRole.OWNER)
-                );
-
-        // Throw an exception if the user is the OWNER of a project with the same name
-        if (isOwnerOfSameNameProject) {
-            throw new ConflictException("You already own a project with the same name.");
-        }
+        return newProject;
     }
 
-    @Override
-    public Project create(ProjectRequest projectRequest) {
-
-        throwExceptionIfUserHasProjectWithSameName(projectRequest.getName());
+    private Project create(ProjectRequest projectRequest) {
 
         Project newProject = toEntity(projectRequest);
         newProject.setCode(generateUniqueProjectCode());
+        newProject.setStartedDate(LocalDate.now());
 
+        return newProject;
+    }
+
+    private Project save(Project project) {
+        return projectRepo.save(project);
+    }
+
+
+    @Transactional
+    @Override
+    public Project add(Project newProject) {
+
+        // Save the project first to get an ID
+        newProject = save(newProject);
+
+        // Create new title and add it to the project
+        Title newTitle = serviceLocator.getService(TitleService.class)
+                .add(new TitleRequest("Owner", "The owner of the project"), newProject.getId());
+
+        // Get authenticated user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getByUserName(authentication.getName());
+        User user = serviceLocator.getService(UserService.class).getByUserName(authentication.getName());
 
-        Member owner = memberService.add(user, newProject, MemberRole.OWNER, null);
+        // Create the owner member
+        Member ownerMember = serviceLocator.getService(MemberService.class).add(user, newProject, MemberRole.OWNER, newTitle);
 
-        newProject.getMembers().add(owner);
+        // Ensure bi-directional relationship
+        newProject.getMembers().add(ownerMember);
 
         return newProject;
     }
 
     @Override
-    public Project save(Project project) {
-        return projectRepo.save(project);
+    public Project add(ProjectRequest projectRequest) {
+        Project newProject = toEntity(projectRequest);
+        return add(newProject);
     }
-
     @Override
-    public ProjectResponse add(ProjectRequest projectRequest) {
-        Project newProject = create(projectRequest);
-        return toResponse(save(newProject));
+    public Project update(Long projectId, Project newProject) {
+        Project existingProject = getById(projectId);
+
+        // Copy properties from newProject to existedProject, excluding the "id", "code", "type","startedDate","members", "tasks", "titles","dailyAttendances"
+        nonNullBeanUtils.copyProperties(newProject, existingProject, "id", "code", "type","startedDate","members", "tasks", "titles","dailyAttendances");
+
+        // Save the updated project
+        return projectRepo.save(existingProject);
     }
-
     @Override
-    public Project updateEntity(Long projectId, Project newProject) {
-        Project existedProject = getById(projectId);
-
-        // If the new project name is different, ensure no other project exists with the same new name.
-        if (!existedProject.getName().equalsIgnoreCase(newProject.getName())) {
-            throwExceptionIfUserHasProjectWithSameName(newProject.getName());
-        }
-
-        // Copy properties from newProject to existedProject, excluding the "id", "code", "createdAt", "type"
-        nonNullBeanUtils.copyProperties(newProject, existedProject, "id", "code", "createdAt", "type","memberShips", "tasks", "titles");
-
-        // Save the updated user
-        existedProject = projectRepo.save(existedProject);
-
-        return existedProject;
-    }
-
-    @Override
-    public ProjectResponse update(Long projectId, ProjectRequest projectRequest) {
-
+    public Project update(Long projectId, ProjectRequest projectRequest) {
         Project newProject = projectMapper.toEntity(projectRequest);
-
-        Project existedProject = updateEntity(projectId,newProject);
-
-        return projectMapper.toResponse(existedProject);
+        return update(projectId,newProject);
     }
 
     private void throwExceptionIfProjectStillHasEmployees(Project project) {
-        // Check if the project still has users except the OWNER
-        boolean hasEmployees = project.getMembers().stream()
-                .anyMatch(memberShip -> !memberShip.getMemberRole().equals(MemberRole.OWNER));
-
-        if (hasEmployees) {
-            throw new ConflictException("Cannot delete the project.still has employees associated with this project.");
+        if (project.getMembers().stream().anyMatch(member -> member.getMemberRole() != MemberRole.OWNER)) {
+            throw new ConflictException("Cannot delete the project. It still has employees work on.");
         }
     }
     @Override
@@ -198,13 +185,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Optional<Project> getEntityById(Long projectId) {
+    public Optional<Project> getOptionalById(Long projectId) {
         return projectRepo.findById(projectId);
     }
 
     @Override
     public Project getById(Long projectId) {
-        return getEntityById(projectId).orElseThrow(
+        return getOptionalById(projectId).orElseThrow(
                 () -> new NoSuchElementException("There is no project with id  = " + projectId)
         );
     }
@@ -214,12 +201,5 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toResponse(getById(projectId));
     }
 
-    @Override
-    public List<ProjectResponse> getAll() {
-        return projectRepo.findAll()
-                .stream()
-                .map(projectMapper::toResponse)
-                .toList();
-    }
 
 }

@@ -1,7 +1,7 @@
 package com.edara.edara.controller;
 
 import com.edara.edara.model.dto.ProjectRequest;
-import com.edara.edara.model.dto.TitleRequest;
+import com.edara.edara.model.entity.Project;
 import com.edara.edara.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -17,25 +17,24 @@ public class ProjectController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<?> addProject(@RequestBody @Valid ProjectRequest projectRequest) {
-        return new ResponseEntity<>(projectService.add(projectRequest), HttpStatus.CREATED);
+    public ResponseEntity<?> add(@RequestBody @Valid ProjectRequest projectRequest) {
+        Project newProject = projectService.add(projectRequest);
+        return new ResponseEntity<>(projectService.toResponse(newProject), HttpStatus.CREATED);
     }
     @PutMapping("/update/{projectId}")
-    public ResponseEntity<?> updateProject(@RequestBody @Valid ProjectRequest projectRequest, @PathVariable Long projectId) {
-        return new ResponseEntity<>(projectService.update(projectId,projectRequest), HttpStatus.ACCEPTED);
-    }
-    @GetMapping("/get-by-id/{projectId}")
-    public ResponseEntity<?> getManagerById(@PathVariable Long projectId){
-        return new ResponseEntity<>(this.projectService.getResponseById(projectId),HttpStatus.OK);
+    public ResponseEntity<?> update(@RequestBody @Valid ProjectRequest projectRequest, @PathVariable Long projectId) {
+        Project updatedProject = projectService.update(projectId,projectRequest);
+        return new ResponseEntity<>(projectService.toResponse(updatedProject), HttpStatus.ACCEPTED);
     }
     @DeleteMapping("/delete/{projectId}")
-    public ResponseEntity<?> deleteById(@PathVariable Long projectId) {
+    public ResponseEntity<?> delete(@PathVariable Long projectId) {
         projectService.delete(projectId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-
+    @GetMapping("/get/{projectId}")
+    public ResponseEntity<?> getById(@PathVariable Long projectId){
+        return new ResponseEntity<>(this.projectService.getResponseById(projectId),HttpStatus.OK);
+    }
 
 
 }

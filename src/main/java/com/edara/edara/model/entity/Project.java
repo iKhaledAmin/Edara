@@ -1,12 +1,14 @@
 package com.edara.edara.model.entity;
 
 import com.edara.edara.model.enums.ProjectType;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,10 @@ public class Project extends BaseEntity {
 
     @Column(name = "aggregation_hour")
     private Integer aggregationHour = 12;
+
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @Column(name = "started_at")
+    private LocalDate startedDate;
 
     @OneToMany(mappedBy = "project",
             fetch = FetchType.LAZY,

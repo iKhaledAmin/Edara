@@ -1,6 +1,7 @@
 package com.edara.edara.controller;
 
 import com.edara.edara.model.dto.TitleRequest;
+import com.edara.edara.model.entity.Title;
 import com.edara.edara.service.TitleService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,12 +17,14 @@ public class TitleController {
 
     @PostMapping("/add/{projectId}")
     public ResponseEntity<?> add(@RequestBody @Valid TitleRequest titleRequest, @PathVariable Long projectId) {
-        return new ResponseEntity<>(titleService.add(titleRequest,projectId), HttpStatus.CREATED);
+        Title title = titleService.add(titleRequest,projectId);
+        return new ResponseEntity<>(titleService.toResponse(title), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{titleId}")
     public ResponseEntity<?> update(@RequestBody @Valid TitleRequest titleRequest , @PathVariable Long titleId) {
-        return new ResponseEntity<>(titleService.update(titleId,titleRequest), HttpStatus.ACCEPTED);
+        Title title = titleService.update(titleId,titleRequest);
+        return new ResponseEntity<>(titleService.toResponse(title), HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/delete/{titleId}")

@@ -77,14 +77,14 @@ public class TitleServiceImpl implements TitleService{
 
     @Override
     public Title update(Long titleId, Title newTitle) {
-        Title existedTitle = getById(titleId);
+        Title existingTitle = getById(titleId);
 
-        throwExceptionIfProjectIncludeTitleWithSameName(newTitle.getName(), existedTitle.getProject().getId());
+        throwExceptionIfProjectIncludeTitleWithSameName(newTitle.getName(), existingTitle.getProject().getId());
 
         // Copy properties from newTitle to existedTitle, excluding the "id", "project"
-        nonNullBeanUtils.copyProperties(newTitle, existedTitle, "id","project");
+        nonNullBeanUtils.copyProperties(newTitle, existingTitle, "id","project");
 
-        return save(existedTitle);
+        return save(existingTitle);
     }
 
     @Override
@@ -117,13 +117,13 @@ public class TitleServiceImpl implements TitleService{
     }
 
     @Override
-    public Optional<Title> getEntityById(Long titleId) {
+    public Optional<Title> getOptionalById(Long titleId) {
         return titleRepo.findById(titleId);
     }
 
     @Override
     public Title getById(Long titleId) {
-        return getEntityById(titleId).orElseThrow(
+        return getOptionalById(titleId).orElseThrow(
                 () -> new NoSuchElementException("There is no title with id  = " + titleId)
         );
     }

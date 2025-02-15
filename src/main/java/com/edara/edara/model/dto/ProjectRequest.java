@@ -2,13 +2,11 @@ package com.edara.edara.model.dto;
 
 import com.edara.edara.model.enums.ProjectType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 @Data
 @AllArgsConstructor
@@ -30,6 +28,12 @@ public class ProjectRequest {
     @NotNull(message = "Project type must not be mull")
     @JsonProperty("type")
     private ProjectType type;
+
+
+    @Range(min = 0, max = 23, message = "Aggregation hour must be between 0 and 23")
+    @NotNull(message = "Aggregation hour must not be null")
+    @JsonProperty("aggregation_hour")
+    private Integer aggregationHour;
 
     @JsonProperty("image")
     private String image;

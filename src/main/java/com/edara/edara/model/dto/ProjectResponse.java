@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -31,7 +31,10 @@ public class ProjectResponse {
     @JsonProperty("image")
     private String image;
 
+    @JsonProperty("aggregation_hour")
+    private Integer aggregationHour;
+
     @JsonProperty("started_at")
     @JsonFormat(pattern="yyyy-MM-dd")
-    private Date startedAt;
+    private LocalDate startedAt;
 }

@@ -65,23 +65,13 @@ public class SecurityConfiguration {
                 //.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) // Only HTTPS
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasAuthority("USER")
-                        .requestMatchers("/projects/add").hasAuthority("USER")
-                        .requestMatchers("/projects/get-by-id/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/delete/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/update-member").hasAuthority("USER")
-                        .requestMatchers("/projects/delete-member/{userCode}/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-member/{memberId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-members/{projectId}").hasAuthority("USER")
-
-                        .requestMatchers("/projects/addNormalMember-task/{projectId}").hasAuthority("USER")
-                        .requestMatchers("/projects/delete-task/{taskId}").hasAuthority("USER")
-                        .requestMatchers("/projects/assign-task/{taskId}/{employeeId}").hasAuthority("USER")
-                        .requestMatchers("/projects/get-all-user-tasks/{userId}").hasAuthority("USER")
-
-
 
                         .requestMatchers("/auth/login", "/users/register").permitAll()
+
+                        .requestMatchers("/projects/add").hasAuthority("USER")
+                        .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/delete/{projectId}").hasAuthority("USER")
+                        .requestMatchers("/projects/get/{projectId}").hasAuthority("USER")
 
                         .requestMatchers("/titles/add/{projectId}").hasAuthority("USER")
                         .requestMatchers("/titles/update/{titleId}").hasAuthority("USER")

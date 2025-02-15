@@ -23,7 +23,7 @@ public interface TitleService  {
      void delete(Long titleId);
 
 
-     Optional<Title> getEntityById(Long titleId);
+     Optional<Title> getOptionalById(Long titleId);
      Title getById(Long titleId);
      TitleResponse getResponseById(Long titleId);
      List<Title> getAllByProjectId(Long projectId);

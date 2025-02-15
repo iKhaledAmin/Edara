@@ -8,9 +8,11 @@ import com.edara.edara.model.entity.DailyAttendance;
 import com.edara.edara.model.entity.Member;
 import com.edara.edara.model.entity.Project;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -219,27 +221,26 @@ public interface DailyAttendanceService {
       * Aggregates the daily attendance records for a given member and project.
       * <p>
       * This method first attempts to retrieve the existing {@link DailyAttendance} record for the specified
-      * {@link Member} and {@link Project} on the current day using the {@link #getUnAggregatedByMemberIdAndProjectIdAndDate} method.
-      * If no such record exists, a new {@link DailyAttendance} entry is created
-      * If the {@link DailyAttendance} is newly created, it will automatically be marked as aggregated.
+      * {@link Member} and {@link Project} on the current day using the {@link #getOnGoingDailyAttendanceByUserCodeAndProjectId} method.
+      * If no such record exists, a new {@link DailyAttendance} entry is created, marked as aggregated, and saved.
       * </p>
       * <p>
       * Once the attendance record is found or created, the method checks if any attendance records exist for the day.
-      * If such records are found, the method proceeds to perform the aggregation of attendance data:
+      * If such records are found, it proceeds with the aggregation process:
       * <ul>
       *     <li>It calculates the total attendance period by determining the first and last attendance times recorded for the day.</li>
       *     <li>It updates the {@link DailyAttendance} period and marks all related {@link CurrentAttendance} records as aggregated.</li>
       * </ul>
       * </p>
       * <p>
-      * This method ensures that the {@link DailyAttendance} record is either retrieved or newly created, with the attendance being
-      * aggregated only if current attendance records are present.
+      * This method ensures that a {@link DailyAttendance} record exists and is aggregated only if attendance records are present.
+      * The method also utilizes {@link CollectionUtils#isEmpty(Collection)} to simplify the check for existing attendance records.
       * </p>
       *
-      * @param memberId The unique identifier of the member whose daily attendance is to be aggregated.
+      * @param memberId  The unique identifier of the member whose daily attendance is to be aggregated.
       * @param projectId The unique identifier of the project to which the member's attendance is associated.
       */
-     void aggregateDailyMemberAttendancesOfProject(Long memberId, Long projectId);
+      void aggregateDailyMemberAttendancesOfProject(Long memberId, Long projectId);
 
 
 }

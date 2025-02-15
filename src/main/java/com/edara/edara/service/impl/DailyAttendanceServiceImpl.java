@@ -12,6 +12,7 @@ import com.edara.edara.repository.DailyAttendanceRepo;
 import com.edara.edara.service.*;
 import com.edara.edara.utils.Utilts;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -328,28 +329,29 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
      *
      * @param dailyAttendance The {@link DailyAttendance} object that contains the attendance records to be aggregated.
      * @return The updated {@link DailyAttendance} object, with the attendance period calculated and all attendance records marked as aggregated.
-     * @throws IllegalArgumentException If the {@link DailyAttendance} is null or contains invalid data (e.g., invalid attendance records).
      * @see #getFirstTime(List)
      * @see #getOrFinalizeLastEndTime(List)
      * @see Utilts#calculatePeriod(LocalDateTime, LocalDateTime)
      */
+
     private DailyAttendance aggregate(DailyAttendance dailyAttendance) {
         List<CurrentAttendance> currentAttendances = dailyAttendance.getCurrentAttendances();
 
-        // Return existing dailyAttendance if no attendance records are found
-        if (currentAttendances == null || currentAttendances.isEmpty()) {
+        if (CollectionUtils.isEmpty(currentAttendances)) {
             return dailyAttendance;
         }
 
         LocalDateTime firstStartTime = getFirstTime(currentAttendances);
         LocalDateTime lastEndTime = getOrFinalizeLastEndTime(currentAttendances);
 
-        if (firstStartTime != null && lastEndTime != null) {
-            dailyAttendance.setPeriod(Utilts.calculatePeriod(firstStartTime, lastEndTime));
-
-            // Mark all CurrentAttendance records as aggregated
-            currentAttendances.forEach(attendance -> attendance.setIsAggregated(true));
+        if (firstStartTime == null || lastEndTime == null) {
+            return dailyAttendance;
         }
+
+        dailyAttendance.setPeriod(Utilts.calculatePeriod(firstStartTime, lastEndTime));
+
+        // Use forEach only if necessary; otherwise, consider using a batch update
+        currentAttendances.forEach(attendance -> attendance.setIsAggregated(true));
 
         dailyAttendance.setIsAggregated(true);
         return save(dailyAttendance);
@@ -358,22 +360,28 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
     @Transactional
     public void aggregateDailyMemberAttendancesOfProject(Long memberId, Long projectId) {
-        Member member = serviceLocator.getService(MemberService.class).getById(memberId);
-        Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
 
-        // Try to fetch an existing DailyAttendance
-        Optional<DailyAttendance> OptionalDailyAttendance = getOnGoingDailyAttendanceByUserCodeAndProjectId(member.getUser().getUserCode(), project.getId());
+        Optional<DailyAttendance> optionalDailyAttendance =
+                getOnGoingDailyAttendanceByUserCodeAndProjectId(
+                        serviceLocator.getService(MemberService.class).getById(memberId).getUser().getUserCode()
+                        , projectId
+                );
 
-        DailyAttendance dailyAttendance = OptionalDailyAttendance.orElseGet(() -> {
-            // If not found, create a new DailyAttendance and set isAggregated to true
-            DailyAttendance newDailyAttendance = add(member, project,null);
-            newDailyAttendance.setIsAggregated(true); // Mark it as aggregated
-            save(newDailyAttendance); // Persist the new DailyAttendance
-            return newDailyAttendance;
-        });
+        DailyAttendance dailyAttendance;
 
-        // Only aggregate if there are current attendances
-        if (!dailyAttendance.getCurrentAttendances().isEmpty()) {
+        if (optionalDailyAttendance.isPresent()) {
+            dailyAttendance = optionalDailyAttendance.get();
+        } else {
+            dailyAttendance = add(
+                    serviceLocator.getService(MemberService.class).getById(memberId),
+                    serviceLocator.getService(ProjectService.class).getById(projectId),
+                    null
+            );
+            dailyAttendance.setIsAggregated(true);
+            save(dailyAttendance);
+        }
+
+        if (!CollectionUtils.isEmpty(dailyAttendance.getCurrentAttendances())) {
             aggregate(dailyAttendance);
         }
     }
