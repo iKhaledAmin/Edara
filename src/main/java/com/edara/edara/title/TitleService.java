@@ -1,0 +1,31 @@
+package com.edara.edara.title;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public interface TitleService  {
+
+     TitleResponse toResponse(Title title);
+     Title toEntity(TitleRequest titleRequest);
+
+     Title add(Title newTitle, Long projectId);
+     Title add(TitleRequest titleRequest, Long projectId);
+
+     Title update(Long titleId, Title newTitle);
+     Title update(Long titleId, TitleRequest titleRequest);
+
+     void delete(Long titleId);
+
+
+     Optional<Title> getOptionalById(Long titleId);
+     Title getById(Long titleId);
+     TitleResponse getResponseById(Long titleId);
+     List<Title> getAllByProjectId(Long projectId);
+     List<TitleResponse> getResponseAllByProjectId(Long projectId);
+
+
+
+}

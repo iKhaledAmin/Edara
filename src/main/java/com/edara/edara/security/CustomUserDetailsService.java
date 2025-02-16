@@ -1,7 +1,7 @@
 package com.edara.edara.security;
 
-import com.edara.edara.model.entity.Person;
-import com.edara.edara.service.PersonService;
+import com.edara.edara.person.Person;
+import com.edara.edara.person.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

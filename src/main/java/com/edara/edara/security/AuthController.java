@@ -1,9 +1,10 @@
 package com.edara.edara.security;
 
-import com.edara.edara.constants.ApplicationConstants;
-import com.edara.edara.model.entity.User;
-import com.edara.edara.model.mapper.UserMapper;
-import com.edara.edara.service.UserService;
+
+import com.edara.edara.global.ApplicationConstants;
+import com.edara.edara.user.User;
+import com.edara.edara.user.UserMapper;
+import com.edara.edara.user.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.validation.Valid;

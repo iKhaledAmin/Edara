@@ -1,7 +1,7 @@
 package com.edara.edara.security.filter;
 
 
-import com.edara.edara.constants.ApplicationConstants;
+import com.edara.edara.global.ApplicationConstants;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;

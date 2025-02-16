@@ -1,0 +1,54 @@
+package com.edara.edara.task;
+
+import com.edara.edara.member.Member;
+import com.edara.edara.global.BaseEntity;
+import com.edara.edara.project.Project;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+
+
+@Entity
+@Table(name = "task")
+public class Task extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "task_id")
+    private Long id;
+
+    private String name;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String code;
+
+    @JsonFormat(pattern="yyyy-MM-dd-hh-mm")
+    private Date deadline;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
+
+    @ManyToOne( fetch = FetchType.LAZY,
+            optional = false,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    @JoinColumn(name = "project_id", referencedColumnName = "project_id", nullable = false)
+    private Project project;
+
+    @ManyToOne( fetch = FetchType.LAZY,
+            optional = true,
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE,CascadeType.DETACH, CascadeType.REFRESH}
+    )
+    @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = true)
+    private Member member;
+}
