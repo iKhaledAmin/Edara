@@ -27,7 +27,7 @@ public class MemberResponse {
     private String memberName;
 
     @JsonProperty("member_image")
-    private String memberImage;
+    private byte[] memberImage;
 
     @JsonProperty("member_role")
     @Enumerated(EnumType.STRING)

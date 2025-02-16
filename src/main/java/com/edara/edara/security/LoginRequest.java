@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class LoginRequest {
-    @JsonProperty("user_name")
-    @NotNull(message = "Username must not be null")
-    private String userName;
+    @JsonProperty("account")
+    @NotNull(message = "Account must not be null")
+    private String account;
 
     @JsonProperty("password")
     @NotNull(message = "Password must not be null")

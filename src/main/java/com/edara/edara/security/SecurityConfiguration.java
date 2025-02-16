@@ -64,9 +64,12 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 //.requiresChannel(rcc -> rcc.anyRequest().requiresSecure()) // Only HTTPS
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/users/edit-profile/{userId}", "/users/get-by-id/{userId}").hasAuthority("USER")
+
 
                         .requestMatchers("/auth/login", "/users/register").permitAll()
+
+                        .requestMatchers("/users/edit-profile/{userId}").hasAuthority("USER")
+                        .requestMatchers("/users/get/{userId}").hasAuthority("USER")
 
                         .requestMatchers("/projects/add").hasAuthority("USER")
                         .requestMatchers("/projects/update/{projectId}").hasAuthority("USER")

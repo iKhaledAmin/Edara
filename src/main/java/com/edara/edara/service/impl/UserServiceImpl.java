@@ -1,24 +1,24 @@
 package com.edara.edara.service.impl;
 
-import com.edara.edara.model.dto.EditProfileRequest;
+import com.edara.edara.exception.ConflictException;
+import com.edara.edara.model.dto.RegistrationRequest;
 import com.edara.edara.model.dto.UserRequest;
 import com.edara.edara.model.dto.UserResponse;
 import com.edara.edara.model.entity.User;
 import com.edara.edara.model.enums.Role;
 import com.edara.edara.model.mapper.UserMapper;
 import com.edara.edara.repository.UserRepo;
-import com.edara.edara.service.PersonService;
 import com.edara.edara.service.UserService;
+import com.edara.edara.utils.NonNullBeanUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -28,15 +28,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;
-    private final PersonService personService;
     private final PasswordEncoder passwordEncoder;
+    private final NonNullBeanUtils nonNullBeanUtils;
 
 
-    private void throwExceptionIfUserNameAlreadyExist(String account) {
-        getEntityByUserName(account)
-                .ifPresent(user -> { throw new RuntimeException("This user name is already exist.");
-                });
-    }
+
 
     private Long getNextId(){
         Long lastId = userRepo.getLastId();
@@ -58,11 +54,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private String generateUniqueCode(String firstName, String lastName) {
-        String prefix = firstName.substring(0, 1).toLowerCase() + lastName.substring(0, 1).toLowerCase();
+    private String generateUniqueCode() {
         Long nextId = getNextId();
         String sequenceNumber = hashIdToSixDigit(nextId.toString());
-        return prefix + sequenceNumber;
+        return sequenceNumber;
     }
 
 
@@ -75,90 +70,108 @@ public class UserServiceImpl implements UserService {
     public User toEntity(UserRequest userRequest) {
         return userMapper.toEntity(userRequest);
     }
-
     @Override
-    public User create(UserRequest userRequest) {
-        throwExceptionIfUserNameAlreadyExist(userRequest.getUserName());
-        User newUser = userMapper.toEntity(userRequest);
-        newUser.setRole(Role.USER);
-        newUser.setDateOfJoining(new Date());
-        newUser.setUserCode(
-                generateUniqueCode(newUser.getFirstName(),newUser.getLastName())
-        );
+    public User toEntity(RegistrationRequest request) {
+        return userMapper.toEntity(request);
+    }
 
-        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+    private User create(){
+
+        User newUser = new User();
+        newUser.setRole(Role.USER);
+        newUser.setDateOfJoining(LocalDate.now());
+        newUser.setUserCode(generateUniqueCode());
+
+        return newUser;
+    }
+
+    private void throwExceptionIfAccountAlreadyExist(String account) {
+        getOptionalByAccount(account)
+                .ifPresent(user -> { throw new ConflictException("This account is already exist.");
+                });
+    }
+
+    private User create(RegistrationRequest registrationRequest) {
+        throwExceptionIfAccountAlreadyExist(registrationRequest.getAccount());
+
+        User newUser = toEntity(registrationRequest);
+        newUser.setRole(Role.USER);
+        newUser.setDateOfJoining(LocalDate.now());
+        newUser.setUserCode(generateUniqueCode());
+
+        String hashedPassword = passwordEncoder.encode(registrationRequest.getPassword());
         newUser.setPassword(hashedPassword);
 
         return newUser;
     }
 
-    @Override
-    public User save(User user) {
+    private User save(User user) {
         return userRepo.save(user);
     }
 
-    @Override
-    public UserResponse add(UserRequest userRequest) {
-        User newUser = create(userRequest);
-        return toResponse( save(newUser));
+
+    private User add(RegistrationRequest registrationRequest) {
+        User newUser = create(registrationRequest);
+        return save(newUser);
     }
 
     @Override
-    public UserResponse register(UserRequest userRequest){
-        return add(userRequest);
-    }
-
-    @Override
-    public User updateEntity(Long userId, User newUser) {
-        User existedUser = getById(userId);
-
-        // Copy properties from newUser to existedUser, excluding the "id", "userCode", "dateOfJoining", "role"
-        BeanUtils.copyProperties(newUser, existedUser, "id", "userCode", "dateOfJoining", "role");
-
-        // Save the updated user
-        existedUser = userRepo.save(existedUser);
-
-        return existedUser;
-    }
-
-    @Override
-    public UserResponse update(Long userId , UserRequest userRequest) {
-        User newUser = userMapper.toEntity(userRequest);
-
-        User existedUser = updateEntity(userId,newUser);
-
-        return userMapper.toResponse(existedUser);
-    }
-
-    @Override
-    public UserResponse editProfile(Long userId, EditProfileRequest editProfileRequest){
-        User user = (User) personService.editProfile(userId,editProfileRequest);
-
-        user.setProfession(editProfileRequest.getProfession());
-        user = updateEntity(userId,user);
-        return userMapper.toResponse(user);
-    }
-
-    @Override
-    public Optional<User> getEntityByUserName(String userName) {
-        return userRepo.findByUserName(userName);
-    }
-
-    @Override
-    public User getByUserName(String userName) {
-        return getEntityByUserName(userName).orElseThrow(
-                () -> new NoSuchElementException("There is no user with userName = " + userName)
+    public UserResponse register(RegistrationRequest registrationRequest){
+        return toResponse(
+                add(registrationRequest)
         );
     }
 
     @Override
-    public Optional<User> getEntityByCode(String userCode) {
+    public User update(Long userId, User newUser) {
+        User existingUser = getById(userId);
+
+        // Check if the new password is provided and different from the existing one
+        if (StringUtils.hasText(newUser.getPassword())
+                && !passwordEncoder.matches(newUser.getPassword(), existingUser.getPassword())) {
+            existingUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        }
+
+        // Copy properties from newUser to existingUser, excluding sensitive fields
+        nonNullBeanUtils.copyProperties(newUser, existingUser,
+                "id", "userCode", "account", "password", "dateOfJoining", "role", "members");
+
+        // Save the updated user
+        return save(existingUser);
+    }
+
+    @Override
+    public User update(Long userId , UserRequest userRequest) {
+        User newUser = userMapper.toEntity(userRequest);
+        return update(userId,newUser);
+    }
+
+    @Override
+    public UserResponse editProfile(Long userId, UserRequest userRequest){
+        User user = update(userId, userRequest);
+        return toResponse(user);
+    }
+
+    @Override
+    public Optional<User> getOptionalByAccount(String account) {
+        return userRepo.findByAccount(account);
+    }
+
+    @Override
+    public User getByAccount(String account) {
+        return getOptionalByAccount(account).orElseThrow(
+                () -> new NoSuchElementException("There is no user with account = " + account)
+        );
+    }
+
+    @Override
+    public Optional<User> getOptionalByCode(String userCode) {
         return userRepo.findByUserCode(userCode);
     }
 
     @Override
     public User getByCode(String userCode) {
-        return getEntityByCode(userCode).orElseThrow(
+        return getOptionalByCode(userCode).orElseThrow(
                 () -> new NoSuchElementException("There is no user with userCode = " + userCode)
         );
     }
@@ -170,13 +183,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getEntityById(Long userId) {
+    public Optional<User> getOptionalById(Long userId) {
         return userRepo.findById(userId);
     }
 
     @Override
     public User getById(Long userId) {
-        return getEntityById(userId).orElseThrow(
+        return getOptionalById(userId).orElseThrow(
                 () -> new NoSuchElementException("There is no user with id  = " + userId)
         );
     }
@@ -186,11 +199,4 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(getById(userId));
     }
 
-    @Override
-    public List<UserResponse> getAll() {
-        return userRepo.findAll()
-                .stream()
-                .map(userMapper::toResponse)
-                .toList();
-    }
 }

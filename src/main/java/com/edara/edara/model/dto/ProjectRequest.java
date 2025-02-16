@@ -36,5 +36,5 @@ public class ProjectRequest {
     private Integer aggregationHour;
 
     @JsonProperty("image")
-    private String image;
+    private byte[] image;
 }

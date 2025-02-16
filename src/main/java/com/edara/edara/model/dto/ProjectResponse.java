@@ -29,7 +29,7 @@ public class ProjectResponse {
     private ProjectType type;
 
     @JsonProperty("image")
-    private String image;
+    private byte[] image;
 
     @JsonProperty("aggregation_hour")
     private Integer aggregationHour;

@@ -44,9 +44,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> Login (@RequestBody @Valid LoginRequest loginRequest) {
         String jwt = "";
-        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.getUserName(),
+        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.getAccount(),
                 loginRequest.getPassword());
-        User user = userService.getByUserName(loginRequest.getUserName());
+        User user = userService.getByAccount(loginRequest.getAccount());
         Authentication authenticationResponse = authenticationManager.authenticate(authentication);
         if(null != authenticationResponse && authenticationResponse.isAuthenticated()) {
             if (null != env) {

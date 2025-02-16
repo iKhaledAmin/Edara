@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -22,14 +21,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final PersonService personService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Person person = personService.getByUserName(username);
+    public UserDetails loadUserByUsername(String account) throws UsernameNotFoundException {
+        Person person = personService.getByAccount(account);
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(person.getRole().toString()));
 
 //        List<GrantedAuthority> authorities = person.getRole().stream().map(authority -> new
 //                SimpleGrantedAuthority(authority.getName())).collect(Collectors.toList());
 
-        return new User(person.getUserName(), person.getPassword(), authorities);
+        return new User(person.getAccount(), person.getPassword(), authorities);
     }
 }

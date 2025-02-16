@@ -140,7 +140,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         // Get authenticated user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = serviceLocator.getService(UserService.class).getByUserName(authentication.getName());
+        User user = serviceLocator.getService(UserService.class).getByAccount(authentication.getName());
 
         // Create the owner member
         Member ownerMember = serviceLocator.getService(MemberService.class).add(user, newProject, MemberRole.OWNER, newTitle);

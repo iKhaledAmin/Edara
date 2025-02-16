@@ -39,7 +39,7 @@ public class Project extends BaseEntity {
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")
-    private String image;
+    private byte[] image;
 
     @Column(name = "aggregation_hour")
     private Integer aggregationHour = 12;

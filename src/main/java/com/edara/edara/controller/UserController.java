@@ -1,8 +1,8 @@
 package com.edara.edara.controller;
 
 
-import com.edara.edara.model.dto.EditProfileRequest;
 import com.edara.edara.model.dto.UserRequest;
+import com.edara.edara.model.dto.RegistrationRequest;
 import com.edara.edara.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -18,17 +18,17 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserRequest userRequest) {
-            return new ResponseEntity<>(userService.register(userRequest), HttpStatus.CREATED);
+    public ResponseEntity<?> register(@RequestBody @Valid RegistrationRequest registrationRequest) {
+            return new ResponseEntity<>(userService.register(registrationRequest), HttpStatus.CREATED);
     }
 
     @PutMapping("/edit-profile/{userId}")
-    public ResponseEntity<?> editProfile(@RequestBody @Valid EditProfileRequest editProfileRequest, @PathVariable Long userId){
-            return new ResponseEntity<>(this.userService.editProfile(userId,editProfileRequest), HttpStatus.ACCEPTED);
+    public ResponseEntity<?> editProfile(@PathVariable Long userId, @RequestBody @Valid UserRequest userRequest){
+            return new ResponseEntity<>(this.userService.editProfile(userId, userRequest), HttpStatus.ACCEPTED);
     }
 
-    @GetMapping("/get-by-id/{userId}")
-    public ResponseEntity<?> getCustomerById(@PathVariable Long userId){
+    @GetMapping("/get/{userId}")
+    public ResponseEntity<?> getById(@PathVariable Long userId){
             return new ResponseEntity<>(this.userService.getResponseById(userId),HttpStatus.OK);
     }
 }

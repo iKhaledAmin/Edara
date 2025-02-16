@@ -12,7 +12,7 @@ public interface UserRepo extends JpaRepository<User,Long> {
 
     @Query("SELECT MAX(u.id) FROM User u")
     Long getLastId();
-    Optional<User> findByUserName(String userName);
 
     Optional<User> findByUserCode(String userCode);
+    Optional<User> findByAccount(String account);
 }
