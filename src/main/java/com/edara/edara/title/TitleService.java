@@ -11,6 +11,8 @@ public interface TitleService  {
      TitleResponse toResponse(Title title);
      Title toEntity(TitleRequest titleRequest);
 
+     boolean isExistsByNameIgnoreCaseAndProjectId(String titleName, Long projectId);
+
      Title add(Title newTitle, Long projectId);
      Title add(TitleRequest titleRequest, Long projectId);
 

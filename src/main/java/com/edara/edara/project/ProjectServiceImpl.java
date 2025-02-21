@@ -191,7 +191,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Project getById(Long projectId) {
         return getOptionalById(projectId).orElseThrow(
-                () -> new NoSuchElementException("There is no project with id  = " + projectId)
+                () -> new NoSuchElementException("There is no project with id = " + projectId)
         );
     }
 

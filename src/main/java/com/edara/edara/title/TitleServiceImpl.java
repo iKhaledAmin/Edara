@@ -2,10 +2,10 @@ package com.edara.edara.title;
 
 import com.edara.edara.exception.ConflictException;
 import com.edara.edara.global.ServiceLocator;
+import com.edara.edara.global.utils.NonNullBeanUtils;
 import com.edara.edara.member.MemberService;
 import com.edara.edara.project.Project;
 import com.edara.edara.project.ProjectService;
-import com.edara.edara.global.utils.NonNullBeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +45,12 @@ public class TitleServiceImpl implements TitleService{
         return titleRepo.save(title);
     }
 
-    private void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Long projectId) {
-        if (titleRepo.existsByNameIgnoreCaseAndProjectId(titleName, projectId)) {
+    public boolean isExistsByNameIgnoreCaseAndProjectId(String titleName, Long projectId) {
+        return titleRepo.existsByNameIgnoreCaseAndProjectId(titleName, projectId);
+    }
+
+    public void throwExceptionIfProjectIncludeTitleWithSameName(String titleName, Long projectId) {
+        if (isExistsByNameIgnoreCaseAndProjectId(titleName, projectId)) {
             throw new ConflictException("Title with the same name already exists in this project.");
         }
     }
@@ -118,7 +122,7 @@ public class TitleServiceImpl implements TitleService{
     @Override
     public Title getById(Long titleId) {
         return getOptionalById(titleId).orElseThrow(
-                () -> new NoSuchElementException("There is no title with id  = " + titleId)
+                () -> new NoSuchElementException("There is no title with id = " + titleId)
         );
     }
 

@@ -16,7 +16,7 @@ public interface TaskService  {
     TaskResponse addTaskToProject(TaskRequest taskRequest);
     TaskResponse assignTaskToMember(Long taskId,String userCode);
     void delete(Long taskId);
-    Optional<Task> getEntityById(Long taskId);
+    Optional<Task> getOptionalById(Long taskId);
     Task getById(Long taskId);
     TaskResponse getResponseById(Long taskId);
      List<Task> getAllByUserCode(String userCode);

@@ -192,13 +192,13 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public Optional<Task> getOptionalById(Long taskId) {
+    public Optional<Task> getEntityById(Long taskId) {
         return taskRepo.findById(taskId);
     }
 
     @Override
     public Task getById(Long taskId) {
-        return getOptionalById(taskId).orElseThrow(
+        return getEntityById(taskId).orElseThrow(
                 () -> new NoSuchElementException("There is no task with id  = " + taskId)
         );
     }
