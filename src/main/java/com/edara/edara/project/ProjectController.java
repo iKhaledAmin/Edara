@@ -13,9 +13,9 @@ public class ProjectController {
     private final ProjectService projectService;
 
 
-    @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody @Valid ProjectRequest projectRequest) {
-        Project newProject = projectService.add(projectRequest);
+    @PostMapping("/add/{userCode}")
+    public ResponseEntity<?> add(@RequestBody @Valid ProjectRequest projectRequest, @PathVariable String userCode) {
+        Project newProject = projectService.add(userCode,projectRequest);
         return new ResponseEntity<>(projectService.toResponse(newProject), HttpStatus.CREATED);
     }
     @PutMapping("/update/{projectId}")

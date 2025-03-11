@@ -84,28 +84,39 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
-    private User create(RegistrationRequest registrationRequest) {
-        throwExceptionIfAccountAlreadyExist(registrationRequest.getAccount());
-
-        User newUser = toEntity(registrationRequest);
-        newUser.setRole(Role.USER);
-        newUser.setDateOfJoining(LocalDate.now());
-        newUser.setUserCode(generateUniqueCode());
-
-        String hashedPassword = passwordEncoder.encode(registrationRequest.getPassword());
-        newUser.setPassword(hashedPassword);
-
-        return newUser;
-    }
+//    private User create(RegistrationRequest registrationRequest) {
+//        throwExceptionIfAccountAlreadyExist(registrationRequest.getAccount());
+//        User newUser = toEntity(registrationRequest);
+//        newUser.setRole(Role.USER);
+//        newUser.setDateOfJoining(LocalDate.now());
+//        newUser.setUserCode(generateUniqueCode());
+//
+//        String hashedPassword = passwordEncoder.encode(registrationRequest.getPassword());
+//        newUser.setPassword(hashedPassword);
+//
+//        return newUser;
+//    }
 
     private User save(User user) {
         return userRepo.save(user);
     }
 
 
-    private User add(RegistrationRequest registrationRequest) {
-        User newUser = create(registrationRequest);
+    public User add(User newUser) {
+        throwExceptionIfAccountAlreadyExist(newUser.getAccount());
+        newUser.setRole(Role.USER);
+        newUser.setDateOfJoining(LocalDate.now());
+        newUser.setUserCode(generateUniqueCode());
+
+        String hashedPassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(hashedPassword);
+
         return save(newUser);
+    }
+
+    public User add(RegistrationRequest registrationRequest) {
+        User newUser = toEntity(registrationRequest);
+        return add(newUser);
     }
 
     @Override

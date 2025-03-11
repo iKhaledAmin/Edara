@@ -14,7 +14,7 @@ public class TitleController {
 
     @PostMapping("/add/{projectId}")
     public ResponseEntity<?> add(@RequestBody @Valid TitleRequest titleRequest, @PathVariable Long projectId) {
-        Title title = titleService.add(projectId,titleRequest);
+        Title title = titleService.add(titleRequest,projectId);
         return new ResponseEntity<>(titleService.toResponse(title), HttpStatus.CREATED);
     }
 

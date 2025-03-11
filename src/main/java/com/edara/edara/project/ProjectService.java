@@ -37,8 +37,8 @@ public interface ProjectService {
       * @return The saved {@link Project} instance, including its assigned owner.
       * @throws UsernameNotFoundException if the currently authenticated user cannot be found.
       */
-     Project add(Project newProject);
-     Project add(ProjectRequest projectRequest);
+     Project add(String userCode,Project newProject);
+     Project add(String userCode,ProjectRequest projectRequest);
 
 
      Project update(Long projectId, Project newProject);

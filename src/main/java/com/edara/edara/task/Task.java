@@ -8,10 +8,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
 @Data
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 

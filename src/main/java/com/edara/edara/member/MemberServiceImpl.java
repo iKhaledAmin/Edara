@@ -250,6 +250,6 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean isExistsByTitleIdAndProjectId(Long titleId, Long projectId) {
-        return memberRepo.existsByTitleIdAndProjectId(titleId, projectId);
+        return memberRepo.existsByTitle_IdAndProject_Id(titleId, projectId);
     }
 }

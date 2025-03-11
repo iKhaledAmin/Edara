@@ -11,6 +11,8 @@ public interface UserService  {
     User toEntity(UserRequest userRequest);
     User toEntity(RegistrationRequest request);
 
+    User add(User newUser);
+    User add(RegistrationRequest registrationRequest);
     UserResponse register(RegistrationRequest registrationRequest);
 
     User update(Long userId, User newUser);

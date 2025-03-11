@@ -1,24 +1,24 @@
 package com.edara.edara.project;
 
-import com.edara.edara.attendance.DailyAttendance;
-import com.edara.edara.global.BaseEntity;
 import com.edara.edara.member.Member;
+import com.edara.edara.global.BaseEntity;
+import com.edara.edara.attendance.DailyAttendance;
 import com.edara.edara.task.Task;
 import com.edara.edara.title.Title;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 

@@ -64,15 +64,15 @@ public class UserRequest {
     private String phoneNumber;
 
     @JsonProperty("country")
-    @Pattern(regexp = "^[a-zA-Z]+$", message = "Country must contain only letters")
+    @Pattern(regexp = "^[a-zA-Z]+(\\s[a-zA-Z]+)*$", message = "Country must contain only letters and spaces")
     private String country;
 
     @JsonProperty("city")
-    @Pattern(regexp = "^[a-zA-Z]+$", message = "city must contain only letters")
+    @Pattern(regexp = "^[a-zA-Z]+(\\s[a-zA-Z]+)*$", message = "city must contain only letters")
     private String city;
 
     @JsonProperty("profession")
-    @Pattern(regexp = "^[a-zA-Z]+$", message = "Profession must contain only letters")
+    @Pattern(regexp = "^[a-zA-Z]+(\\s[a-zA-Z]+)*$", message = "Profession must contain only letters")
     @Size(min = 3, max = 50, message = "Last name must be between 3 and 50 characters")
     private String profession;
 

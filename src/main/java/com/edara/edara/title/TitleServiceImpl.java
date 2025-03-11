@@ -34,12 +34,10 @@ public class TitleServiceImpl implements TitleService{
 
 
     private Title create() {
-        Title newTitle = new Title();
-        return newTitle;
+        return new Title();
     }
     private Title create(TitleRequest titleRequest) {
-        Title newTitle = toEntity(titleRequest);
-        return newTitle;
+        return toEntity(titleRequest);
     }
     private Title save(Title title) {
         return titleRepo.save(title);
@@ -56,20 +54,19 @@ public class TitleServiceImpl implements TitleService{
     }
 
     @Override
-    public Title add(Title newTitle, Long projectId) {
+    public Title add(Long projectId,Title newTitle) {
         Project project = serviceLocator.getService(ProjectService.class).getById(projectId);
         throwExceptionIfProjectIncludeTitleWithSameName(newTitle.getName(), projectId);
 
         newTitle.setProject(project);
         project.getTitles().add(newTitle);
-
         return save(newTitle);
     }
 
     @Override
-    public Title add(TitleRequest titleRequest, Long projectId) {
+    public Title add(Long projectId,TitleRequest titleRequest) {
         Title newTitle = create(titleRequest);
-        return add(newTitle, projectId);
+        return add(projectId, newTitle);
     }
 
 

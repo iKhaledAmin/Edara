@@ -13,8 +13,8 @@ public interface TitleService  {
 
      boolean isExistsByNameIgnoreCaseAndProjectId(String titleName, Long projectId);
 
-     Title add(Title newTitle, Long projectId);
-     Title add(TitleRequest titleRequest, Long projectId);
+     Title add(Long projectId,Title newTitle);
+     Title add(Long projectId,TitleRequest titleRequest);
 
      Title update(Long titleId, Title newTitle);
      Title update(Long titleId, TitleRequest titleRequest);

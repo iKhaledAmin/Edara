@@ -173,7 +173,7 @@ class TitleServiceImplTest {
         when(titleRepo.save(title)).thenReturn(title);
 
         //Act : Call the method
-        Title result = titleService.add(titleRequest, project.getId());
+        Title result = titleService.add(project.getId(), titleRequest);
 
         //Assert
         assertThat(result).isNotNull();
@@ -196,7 +196,7 @@ class TitleServiceImplTest {
         when(titleRepo.existsByNameIgnoreCaseAndProjectId(titleRequest.getName(), project.getId())).thenReturn(true);
 
         //Act and Assert : Call the method and expect exception
-        assertThatThrownBy(() -> titleService.add(titleRequest, project.getId()))
+        assertThatThrownBy(() -> titleService.add(project.getId(), titleRequest))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("Title with the same name already exists in this project.");
 
@@ -213,7 +213,7 @@ class TitleServiceImplTest {
         when(projectService.getById(project.getId())).thenThrow(new NoSuchElementException("No project found with id = 1"));
 
         // Call the method and expect exception
-        assertThatThrownBy(() -> titleService.add(titleRequest, project.getId()))
+        assertThatThrownBy(() -> titleService.add(project.getId(), titleRequest))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("No project found with id = 1");
 

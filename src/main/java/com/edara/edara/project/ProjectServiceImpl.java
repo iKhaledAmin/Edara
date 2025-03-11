@@ -3,19 +3,16 @@ package com.edara.edara.project;
 import com.edara.edara.attendance.DailyAttendanceService;
 import com.edara.edara.exception.ConflictException;
 import com.edara.edara.global.ServiceLocator;
+import com.edara.edara.global.utils.NonNullBeanUtils;
 import com.edara.edara.member.Member;
 import com.edara.edara.member.MemberRole;
 import com.edara.edara.member.MemberService;
 import com.edara.edara.title.Title;
-import com.edara.edara.title.TitleRequest;
 import com.edara.edara.title.TitleService;
 import com.edara.edara.user.User;
 import com.edara.edara.user.UserService;
-import com.edara.edara.global.utils.NonNullBeanUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -117,7 +114,6 @@ public class ProjectServiceImpl implements ProjectService {
         Project newProject = toEntity(projectRequest);
         newProject.setCode(generateUniqueProjectCode());
         newProject.setStartedDate(LocalDate.now());
-
         return newProject;
     }
 
@@ -128,18 +124,23 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Transactional
     @Override
-    public Project add(Project newProject) {
+    public Project add(String userCode,Project newProject) {
 
         // Save the project first to get an ID
         newProject = save(newProject);
 
         // Create new title and add it to the project
         Title newTitle = serviceLocator.getService(TitleService.class)
-                .add(new TitleRequest("Owner", "The owner of the project"), newProject.getId());
+                .add(
+                    newProject.getId()
+                    ,Title.builder()
+                            .name("Owner")
+                            .description("The owner of the project")
+                    .build()
+                );
 
-        // Get authenticated user
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = serviceLocator.getService(UserService.class).getByAccount(authentication.getName());
+        // Find the authenticated user
+        User user = serviceLocator.getService(UserService.class).getByCode(userCode);
 
         // Create the owner member
         Member ownerMember = serviceLocator.getService(MemberService.class).add(user, newProject, MemberRole.OWNER, newTitle);
@@ -151,9 +152,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project add(ProjectRequest projectRequest) {
+    public Project add(String userCode,ProjectRequest projectRequest) {
         Project newProject = toEntity(projectRequest);
-        return add(newProject);
+        return add(userCode,newProject);
     }
     @Override
     public Project update(Long projectId, Project newProject) {

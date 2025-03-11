@@ -8,7 +8,6 @@ import com.edara.edara.security.filter.CsrfCookieFilter;
 import com.edara.edara.security.filter.JWTTokenGeneratorFilter;
 import com.edara.edara.security.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,7 +68,7 @@ public class SecurityConfiguration {
 
                         .requestMatchers("/auth/login", "/users/register").permitAll()
 
-                        .requestMatchers(PathRequest.toH2Console()).permitAll()
+                        //.requestMatchers(PathRequest.toH2Console()).permitAll()
 
                         .requestMatchers("/users/edit-profile/{userId}").hasAuthority("USER")
                         .requestMatchers("/users/get/{userId}").hasAuthority("USER")
